@@ -13,3 +13,7 @@ Enviroment:
     Directory to hold any sort of visual or enviromental classes/functions/etc.
     path_vis.py : provided a path, plots a line in 3D space within the envrioment, also plots spheres along the path for MPC horizon prediction
     (We should add our building in this directory)
+
+Global:
+    Directory to hold global path planner code
+    (Empty now)
