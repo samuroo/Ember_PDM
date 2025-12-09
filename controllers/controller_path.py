@@ -30,14 +30,23 @@ def mpc_control_path(quadcopter, N, x_init, x_target):
     u = cp.Variable((4, N))
 
     # cost weight matrix
+    # Q = np.diag([
+    #     50*2, 50*2, 50*4, # x, y, z
+    #     10, 10, 20, # φ, θ, ψ
+    #     3, 3, 5, # vx, vy, vz
+    #     1, 1, 1 # p, q, r
+    # ])
+    # # input weight matrix
+    # R = np.diag([0.01, 0.01, 0.01, 0.01])
+
     Q = np.diag([
-        50*2, 50*2, 50*4, # x, y, z
-        10, 10, 20, # φ, θ, ψ
-        3, 3, 5, # vx, vy, vz
-        1, 1, 1 # p, q, r
+        50*2, 50*2, 50*2, # x, y, z
+        10, 10, 0.0, # φ, θ, ψ
+        3, 3, 3, # vx, vy, vz
+        1.5, 1.5, 0.0 # p, q, r
     ])
     # input weight matrix
-    R = np.diag([0.01, 0.01, 0.01, 0.01])
+    R = np.diag([0.1, 5, 5, 0.0])
 
     for k in range(N):
         # extract the next waypoint in 20 steps
@@ -54,6 +63,13 @@ def mpc_control_path(quadcopter, N, x_init, x_target):
         phi, theta = x[3, k], x[4, k]
         vx, vy, vz = x[6, k], x[7, k], x[8, k]
         p, q, r    = x[9, k], x[10, k]  , x[11, k]
+
+        yaw_roll_ang_const = 30
+        constraints += [phi <= np.deg2rad(yaw_roll_ang_const)]
+        constraints += [phi >= -np.deg2rad(yaw_roll_ang_const)]
+        constraints += [theta >= -np.deg2rad(yaw_roll_ang_const)]
+        constraints += [theta >= -np.deg2rad(yaw_roll_ang_const)]
+        
 
     constraints += [x[:, 0] == x_init]
     

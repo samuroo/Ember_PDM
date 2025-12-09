@@ -55,21 +55,21 @@ def run(
     steps = 120
 
     # FOR TEST PURPOSES - LINEAR PATH
-    
+    """
     alphas = np.linspace(0.0, 1.0, steps)
     path = (1 - alphas)[:, None] * INIT_XYZS + alphas[:, None] * TARGET_XYZS
-    
+    """
 
     # FOR TEST PURPOSES - CIRCULAR PATH
-    """
-    waypoints = np.linspace(0, 2*np.pi, steps)
+    
+    waypoints = np.linspace(0, 7*np.pi/4, steps)
     R = 1.0
     xc, yc, zc = INIT_XYZS[0]
     path = np.zeros((steps, 3))
-    path[:,0] = xc + np.sqrt(R**2/2) + R * np.cos(waypoints)
-    path[:,1] = yc + np.sqrt(R**2/2) + R * np.sin(waypoints)
-    path[:,2] = zc   
-    """
+    path[:,0] = xc + np.sqrt(R**2/2) + R * np.cos(waypoints + 5*np.pi/4)
+    path[:,1] = yc + np.sqrt(R**2/2) + R * np.sin(waypoints + 5*np.pi/4)
+    path[:,2] = zc
+    
 
     # Create the environment
     env = CtrlAviary(drone_model=drone,
