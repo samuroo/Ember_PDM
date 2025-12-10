@@ -1,5 +1,8 @@
 import numpy as np
 from scipy.linalg import expm
+from scipy.linalg import solve_discrete_are
+
+
 
 class QuadcopterLinearized:
     """
@@ -27,6 +30,21 @@ class QuadcopterLinearized:
 
         # discretive for MPC use
         self.A, self.B = self._discretize(self.Ac, self.Bc, Ts)
+
+        # MPC weight matrices
+        self.Q = np.diag([
+            50*2, 50*2, 50*2, # x, y, z
+            10, 10, 0.01, # φ, θ, ψ
+            3, 3, 3, # vx, vy, vz
+            1.5, 1.5, 0.01 # p, q, r
+        ])
+        # Input weight matrix
+        self.R = np.diag([0.1, 5, 5, 0.01])
+
+        # compute terminal lqr matrices P and K
+        self.P, self.K = self._compute_terminal_lqr(self.Q, self.R)
+        print(self.P)
+        print(self.K)
 
     def _build_A(self):
         """Returns continuous-time state matrix Ac (12x12)."""
@@ -59,3 +77,8 @@ class QuadcopterLinearized:
         A_d = I + Ac * Ts
         B_d = Bc * Ts
         return A_d, B_d
+
+    def _compute_terminal_lqr(self, Q, R):
+        P = solve_discrete_are(self.A, self.B, Q, R)
+        K = np.linalg.inv(R + self.B.T @ P @ self.B) @ self.B.T @ P @ self.A
+        return P, K

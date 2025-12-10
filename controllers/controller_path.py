@@ -29,35 +29,29 @@ def mpc_control_path(quadcopter, N, x_init, x_target):
     x = cp.Variable((12, N + 1))
     u = cp.Variable((4, N))
 
-    # cost weight matrix
     # Q = np.diag([
-    #     50*2, 50*2, 50*4, # x, y, z
-    #     10, 10, 20, # φ, θ, ψ
-    #     3, 3, 5, # vx, vy, vz
-    #     1, 1, 1 # p, q, r
+    #     50*2, 50*2, 50*2, # x, y, z
+    #     10, 10, 0.0, # φ, θ, ψ
+    #     3, 3, 3, # vx, vy, vz
+    #     1.5, 1.5, 0.0 # p, q, r
     # ])
     # # input weight matrix
-    # R = np.diag([0.01, 0.01, 0.01, 0.01])
-
-    Q = np.diag([
-        50*2, 50*2, 50*2, # x, y, z
-        10, 10, 0.0, # φ, θ, ψ
-        3, 3, 3, # vx, vy, vz
-        1.5, 1.5, 0.0 # p, q, r
-    ])
-    # input weight matrix
-    R = np.diag([0.1, 5, 5, 0.0])
+    # R = np.diag([0.1, 5, 5, 0.0])
 
     for k in range(N):
         # extract the next waypoint in 20 steps
         x_ref_k = x_target[:,k]
 
         # main cost function
-        cost += cp.quad_form(x[:,k] - x_ref_k, Q)
-        cost += cp.quad_form(u[:,k], R)
+        cost += cp.quad_form(x[:,k] - x_ref_k, quadcopter.Q)
+        cost += cp.quad_form(u[:,k], quadcopter.R)
 
         # dynamical model
         constraints += [x[:, k+1] == quadcopter.A @ x[:, k] + quadcopter.B @ u[:, k]]
+        
+        # terminal cost
+        # alpha = 3.0
+        # constraints += [cp.quad_form(x[:, N], quadcopter.P) <= alpha]
         
         # for later use in constraints
         phi, theta = x[3, k], x[4, k]
@@ -67,11 +61,16 @@ def mpc_control_path(quadcopter, N, x_init, x_target):
         yaw_roll_ang_const = 30
         constraints += [phi <= np.deg2rad(yaw_roll_ang_const)]
         constraints += [phi >= -np.deg2rad(yaw_roll_ang_const)]
-        constraints += [theta >= -np.deg2rad(yaw_roll_ang_const)]
+        constraints += [theta <= np.deg2rad(yaw_roll_ang_const)]
         constraints += [theta >= -np.deg2rad(yaw_roll_ang_const)]
         
 
     constraints += [x[:, 0] == x_init]
+
+    # Terminal set
+    # xN = x[:, N]
+    # x_ref_N = x_target[:, N-1]   # last reference point
+    # cost += cp.quad_form(xN - x_ref_N, quadcopter.P)
     
     # Solves the problem
     problem = cp.Problem(cp.Minimize(cost), constraints)
