@@ -71,6 +71,11 @@ def run(
     path[:,2] = zc
     
 
+    # solve path here
+
+
+
+
     # Create the environment
     env = CtrlAviary(drone_model=drone,
                         num_drones=num_drones,
@@ -98,6 +103,9 @@ def run(
 
     # Draw the path visualy 
     draw_path(path)
+
+    # get boxes
+    # draw boxes
 
     # Main simulation Loop
     for i in range(0, int(duration_sec*env.CTRL_FREQ)):
@@ -192,7 +200,6 @@ def plot_3d_from_logger(logger, path):
     plt.show(block=False)
 
 #######################################
-
 if __name__ == "__main__":
    quadcopter = QuadcopterLinearized()
    run()
