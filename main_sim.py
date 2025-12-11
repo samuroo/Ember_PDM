@@ -16,7 +16,7 @@ DEFAULT_USER_DEBUG_GUI = False
 DEFAULT_OBSTACLES = False
 DEFAULT_SIMULATION_FREQ_HZ = 240
 DEFAULT_CONTROL_FREQ_HZ = 48
-DEFAULT_DURATION_SEC = 5
+DEFAULT_DURATION_SEC = 15
 DEFAULT_OUTPUT_FOLDER = 'results'
 DEFAULT_COLAB = False
 
@@ -25,7 +25,7 @@ from dynamics.quadcopter_linear import QuadcopterLinearized
 from enviroment.path_vis import draw_path, update_horizon_visualization
 
 # define horizon for MPC controller
-HORIZON_N = 20 
+HORIZON_N = 20
 
 # Main run simulation function
 def run(
@@ -45,7 +45,7 @@ def run(
         ):
 
     # Init postion and orientation (Roll, Pitch Yaw)
-    INIT_XYZS = np.array([[0, 0, 0.5]])
+    INIT_XYZS = np.array([[-4, 0, 3]])
     INIT_RPYS = np.array([[0, 0, 0]])
 
     # Init a target (right now only used for linear path)
@@ -61,7 +61,7 @@ def run(
     """
 
     # FOR TEST PURPOSES - CIRCULAR PATH
-    
+    """
     waypoints = np.linspace(0, 7*np.pi/4, steps)
     R = 1.0
     xc, yc, zc = INIT_XYZS[0]
@@ -69,7 +69,36 @@ def run(
     path[:,0] = xc + np.sqrt(R**2/2) + R * np.cos(waypoints + 5*np.pi/4)
     path[:,1] = yc + np.sqrt(R**2/2) + R * np.sin(waypoints + 5*np.pi/4)
     path[:,2] = zc
-    
+    """
+
+    path = np.array([
+        [-4.0,          0.0,          1.0        ],
+        [-3.87657877,  -0.46472457,   1.13710679],
+        [-3.49441376,  -0.71876212,   0.93857509],
+        [-2.99671409,  -0.67102954,   0.94265429],
+        [-2.52376163,  -0.82472532,   0.8907546 ],
+        [-2.17027851,  -0.63738638,   0.5908316 ],
+        [-1.67400351,  -0.58612145,   0.62374098],
+        [-1.41475046,  -0.16222689,   0.56805198],
+        [-0.91655595,  -0.1473009,    0.60779419],
+        [-0.88334149,   0.06837946,   0.15792889],
+        [-0.55094397,  -0.21225517,  -0.08855861],
+        [-0.06516102,  -0.18959835,   0.02763776],
+        [ 0.34052381,  -0.45688493,   0.14586509],
+        [ 0.82387744,  -0.39653831,   0.25868156],
+        [ 1.11029244,  -0.66760395,   0.56607361],
+        [ 1.48708611,  -0.68840557,   0.89408858],
+        [ 1.96892046,  -0.55640843,   0.91439639],
+        [ 2.13786524,  -0.61260374,   1.38162197],
+        [ 2.60407165,  -0.45923149,   1.28607861],
+        [ 3.07027807,  -0.30585924,   1.19053525],
+        [ 3.23262635,   0.09084943,   1.44795565],
+        [ 3.66219765,   0.03999245,   1.19719269],
+        [ 4.0,          0.0,          1.0        ]
+    ])
+    path[:,2] += 2
+    path = interpolate_path(path)
+
 
     # Create the environment
     env = CtrlAviary(drone_model=drone,
@@ -191,10 +220,28 @@ def plot_3d_from_logger(logger, path):
 
     plt.show(block=False)
 
+
+def interpolate_path(path, points_per_segment=20):
+    fine_path = []
+
+    for i in range(len(path) - 1):
+        p0 = path[i]
+        p1 = path[i + 1]
+
+        for alpha in np.linspace(0, 1, points_per_segment, endpoint=False):
+            p = (1 - alpha) * p0 + alpha * p1
+            fine_path.append(p)
+
+    fine_path.append(path[-1])  # include final point
+    return np.array(fine_path)
+        
+
+
 #######################################
 
 if __name__ == "__main__":
    quadcopter = QuadcopterLinearized()
    run()
+   print("End of Sim")
 
 
