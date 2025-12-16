@@ -199,6 +199,20 @@ def plot_3d_from_logger(logger, path):
 
     plt.show(block=False)
 
+def interpolate_path(path, points_per_segment=20):
+    fine_path = []
+
+    for i in range(len(path) - 1):
+        p0 = path[i]
+        p1 = path[i + 1]
+
+        for alpha in np.linspace(0, 1, points_per_segment, endpoint=False):
+            p = (1 - alpha) * p0 + alpha * p1
+            fine_path.append(p)
+
+    fine_path.append(path[-1])  # include final point
+    return np.array(fine_path)
+
 #######################################
 if __name__ == "__main__":
    quadcopter = QuadcopterLinearized()
