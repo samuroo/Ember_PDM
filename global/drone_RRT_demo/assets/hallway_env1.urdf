@@ -110,4 +110,58 @@
     <origin xyz="2 0 0.75" rpy="0 0 0"/>
   </joint>
 
+  <!-- FLOOR (top surface at z = 0) -->
+  <link name="floor">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <!-- length x=10, width y=2.2 (a bit wider than walls), thickness z=0.1 -->
+      <geometry>
+        <box size="10 2.2 0.1"/>
+      </geometry>
+      <material name="orange">
+        <color rgba="1.0 0.55 0.0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="10 2.2 0.1"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="floor_joint" type="fixed">
+    <parent link="world"/>
+    <child link="floor"/>
+    <!-- center at z = -0.05 so the TOP is exactly at z = 0 -->
+    <origin xyz="0 0 -0.05" rpy="0 0 0"/>
+  </joint>
+
+  <!-- CEILING (bottom surface at z = 2.0) -->
+  <link name="ceiling">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <!-- same footprint as floor -->
+      <geometry>
+        <box size="10 2.2 0.1"/>
+      </geometry>
+      <material name="orange">
+        <color rgba="1.0 0.55 0.0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="10 2.2 0.1"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="ceiling_joint" type="fixed">
+    <parent link="world"/>
+    <child link="ceiling"/>
+    <!-- center at z = 2.05 so the BOTTOM is exactly at z = 2.0 -->
+    <origin xyz="0 0 2.05" rpy="0 0 0"/>
+  </joint>
+
 </robot>
