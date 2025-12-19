@@ -21,7 +21,7 @@ def update_horizon_visualization(x_ref_traj, base_radius=0.025, end_radius=0.005
     horizon_sphere_ids = []
 
     # Number of points in the trajectory
-    num_markers = max(2,  x_ref_traj.shape[1] // 2)
+    num_markers = max(2,  x_ref_traj.shape[1] // 3)
     # 2. Compute radii decreasing linearly
     radii = np.linspace(base_radius, end_radius, num_markers)
 

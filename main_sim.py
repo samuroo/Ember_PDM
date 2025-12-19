@@ -23,9 +23,18 @@ DEFAULT_COLAB = False
 from controllers.controller_path import mpc_control_path
 from dynamics.quadcopter_linear import QuadcopterLinearized
 from enviroment.path_vis import draw_path, update_horizon_visualization
+from global_solver.solve_rrt_3d_from_urdf import solve_rrt_from_urdf
+from global_solver.urdf_to_boxes3d import load_env_and_extract_boxes3d
 
 # define horizon for MPC controller
 HORIZON_N = 20 
+
+# define assest enviroment
+ENVIROMENT_URDF = "assets/hallway_env1.urdf"
+
+from pathlib import Path
+print("URDF path:", ENVIROMENT_URDF)
+print("Exists?", Path(ENVIROMENT_URDF).exists())
 
 # Main run simulation function
 def run(
@@ -43,9 +52,17 @@ def run(
         output_folder=DEFAULT_OUTPUT_FOLDER,
         colab=DEFAULT_COLAB
         ):
+    
+    # DEFINE START & END (depends on enviroment)
+    start = (4.0, 0.0, 1.0)
+    goal = (-4.0, 0.0, 1.0)
 
-    # Init postion and orientation (Roll, Pitch Yaw)
-    INIT_XYZS = np.array([[0, 0, 0.5]])
+    # SOLVE PATH
+    path = solve_rrt_from_urdf(urdf_path=ENVIROMENT_URDF, start=start, goal=goal, visualize=True)
+    path = interpolate_path(path)
+
+    # Init postion (x,y,z) and orientation (roll,pitch,yaw)
+    INIT_XYZS = np.array([start])
     INIT_RPYS = np.array([[0, 0, 0]])
 
     # Init a target (right now only used for linear path)
@@ -61,7 +78,7 @@ def run(
     """
 
     # FOR TEST PURPOSES - CIRCULAR PATH
-    
+    """
     waypoints = np.linspace(0, 7*np.pi/4, steps)
     R = 1.0
     xc, yc, zc = INIT_XYZS[0]
@@ -69,12 +86,7 @@ def run(
     path[:,0] = xc + np.sqrt(R**2/2) + R * np.cos(waypoints + 5*np.pi/4)
     path[:,1] = yc + np.sqrt(R**2/2) + R * np.sin(waypoints + 5*np.pi/4)
     path[:,2] = zc
-    
-
-    # solve path here
-
-
-
+    """
 
     # Create the environment
     env = CtrlAviary(drone_model=drone,
@@ -104,8 +116,8 @@ def run(
     # Draw the path visualy 
     draw_path(path)
 
-    # get boxes
-    # draw boxes
+    # add collsiion boxes
+    load_env_and_extract_boxes3d("global_solver/"+ ENVIROMENT_URDF)
 
     # Main simulation Loop
     for i in range(0, int(duration_sec*env.CTRL_FREQ)):
