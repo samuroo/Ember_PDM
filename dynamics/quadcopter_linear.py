@@ -33,17 +33,19 @@ class QuadcopterLinearized:
 
         # MPC weight matrices
         self.Q = np.diag([
-            50*3, 50*3, 50*3, # x, y, z
-            10, 10, 0.01, # φ, θ, ψ
+            30, 30, 20, # x, y, z
+            10, 10, 0.001, # φ, θ, ψ
             3, 3, 3, # vx, vy, vz
-            1.5, 1.5, 0.01 # p, q, r
+            1.5, 1.5, 0.001 # p, q, r
         ])
         # Input weight matrix
         self.R = np.diag([0.1, 5, 5, 0.01])
 
         # compute terminal lqr matrices P and K
         self.P, self.K = self._compute_terminal_lqr(self.Q, self.R)
+        print("P Matrix:")
         print(self.P)
+        print("K Matirx:")
         print(self.K)
 
     def _build_A(self):

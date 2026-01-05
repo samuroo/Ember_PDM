@@ -51,7 +51,7 @@ def mpc_control_path(quadcopter, N, x_init, x_target):
         
         # terminal cost
         # alpha = 3.0
-        # constraints += [cp.quad_form(x[:, N], quadcopter.P) <= alpha]
+        
         
         # for later use in constraints
         phi, theta = x[3, k], x[4, k]
@@ -63,14 +63,27 @@ def mpc_control_path(quadcopter, N, x_init, x_target):
         constraints += [phi >= -np.deg2rad(yaw_roll_ang_const)]
         constraints += [theta <= np.deg2rad(yaw_roll_ang_const)]
         constraints += [theta >= -np.deg2rad(yaw_roll_ang_const)]
-        
-
+    
+    # Init constraint
     constraints += [x[:, 0] == x_init]
 
+    
+    # Terminal cost
+    xN = x[:, N]
+    x_ref_N = x_target[:, N-1]   # last reference point
+    cost += cp.quad_form(xN - x_ref_N, quadcopter.P)
+
     # Terminal set
-    # xN = x[:, N]
-    # x_ref_N = x_target[:, N-1]   # last reference point
-    # cost += cp.quad_form(xN - x_ref_N, quadcopter.P)
+    # alpha = 10.0   # tune this
+    # constraints += [cp.quad_form(xN - x_ref_N, quadcopter.P) <= alpha]
+    eps_pos = 1      # m
+    eps_vel = 0.40      # m/s
+    eps_ang = np.deg2rad(12)
+
+    constraints += [
+        cp.abs(xN[0:3] - x_ref_N[0:3]) <= eps_pos,
+    ]
+
     
     # Solves the problem
     problem = cp.Problem(cp.Minimize(cost), constraints)
