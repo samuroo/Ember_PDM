@@ -56,6 +56,7 @@ def run(
 
     # SOLVE PATH
     path = solve_rrt_from_urdf(urdf_path=ENVIROMENT_URDF, start=start, goal=goal, visualize=True)
+    print(path)
     path = interpolate_path(path)
 
     # Init postion (x,y,z) and orientation (roll,pitch,yaw)
@@ -166,6 +167,8 @@ def run(
     if plot:
         plot_3d_from_logger(logger, path)
         logger.plot()
+
+    print("RMS Tracking Error: " + str(rms_tracking_error(logger, path)))
         
 
 ########## HELPER FUNCTIONS ##########
@@ -229,6 +232,39 @@ def interpolate_path(path, points_per_segment=20):
 
     fine_path.append(path[-1])  # include final point
     return np.array(fine_path)
+
+
+
+def rms_tracking_error(logger, path):
+    """
+    logger: logger object
+    path: array of shape (N_ref, 3)
+    returns: RMS position error [m]
+    """
+
+    # Assume single drone
+    j = 0
+    n = int(logger.counters[j])
+
+    # Drone positions
+    drone_pos = np.vstack((
+        logger.states[j, 0, :n],
+        logger.states[j, 1, :n],
+        logger.states[j, 2, :n],
+    )).T  # shape (n, 3)
+
+    # Match lengths
+    N = min(len(path), len(drone_pos))
+    drone_pos = drone_pos[:N]
+    ref_pos   = path[:N]
+
+    # Euclidean error at each timestep
+    errors = np.linalg.norm(drone_pos - ref_pos, axis=1)
+
+    # RMS
+    rms = np.sqrt(np.mean(errors**2))
+    return rms
+
 #######################################
 
 if __name__ == "__main__":
