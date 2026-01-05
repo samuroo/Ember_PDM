@@ -121,7 +121,7 @@ def run(
     # add collsiion boxes
     load_env_and_extract_boxes3d("global_solver/"+ ENVIROMENT_URDF)
 
-    radiis = [0.2, 0.25, 0.8]
+    radiis = [0.25, 0.25, 0.8]
 
     #Creating moving ellipsoid
     ellipsoid_id = create_moving_ellipsoid(

@@ -16,25 +16,22 @@ DEFAULT_USER_DEBUG_GUI = False
 DEFAULT_OBSTACLES = False
 DEFAULT_SIMULATION_FREQ_HZ = 240
 DEFAULT_CONTROL_FREQ_HZ = 48
-DEFAULT_DURATION_SEC = 5
+DEFAULT_DURATION_SEC = 20
 DEFAULT_OUTPUT_FOLDER = 'results'
 DEFAULT_COLAB = False
 
-from controllers.controller_path import mpc_control_path
+# from controllers.controller_path import mpc_control_path
+from controllers.controller_path import MPCPathController
 from dynamics.quadcopter_linear import QuadcopterLinearized
 from enviroment.path_vis import draw_path, update_horizon_visualization
 from global_solver.solve_rrt_3d_from_urdf import solve_rrt_from_urdf
 from global_solver.urdf_to_boxes3d import load_env_and_extract_boxes3d
+import time
 
 # define horizon for MPC controller
 HORIZON_N = 20 
-
 # define assest enviroment
 ENVIROMENT_URDF = "assets/hallway_env1.urdf"
-
-from pathlib import Path
-print("URDF path:", ENVIROMENT_URDF)
-print("Exists?", Path(ENVIROMENT_URDF).exists())
 
 # Main run simulation function
 def run(
@@ -65,20 +62,17 @@ def run(
     INIT_XYZS = np.array([start])
     INIT_RPYS = np.array([[0, 0, 0]])
 
-    # Init a target (right now only used for linear path)
-    TARGET_XYZS = np.array([3,1,2.5])
-    
-    # amount of way points on the path
-    steps = 120
-
     # FOR TEST PURPOSES - LINEAR PATH
     """
+    TARGET_XYZS = np.array([3,1,2.5])   
+    steps = 120 
     alphas = np.linspace(0.0, 1.0, steps)
     path = (1 - alphas)[:, None] * INIT_XYZS + alphas[:, None] * TARGET_XYZS
     """
 
     # FOR TEST PURPOSES - CIRCULAR PATH
     """
+    steps = 120
     waypoints = np.linspace(0, 7*np.pi/4, steps)
     R = 1.0
     xc, yc, zc = INIT_XYZS[0]
@@ -106,6 +100,10 @@ def run(
     # Obtain the PyBullet Client ID from the environment
     PYB_CLIENT = env.getPyBulletClient()
 
+    # set time variables
+    dt = 1.0 / env.CTRL_FREQ
+    t_wall_start = time.perf_counter()
+
     # Init the logger
     logger = Logger(logging_freq_hz=control_freq_hz, num_drones=num_drones,
                     output_folder=output_folder, colab=colab)
@@ -119,8 +117,11 @@ def run(
     # add collsiion boxes
     load_env_and_extract_boxes3d("global_solver/"+ ENVIROMENT_URDF)
 
+    mpc = MPCPathController(quadcopter, HORIZON_N)
+
     # Main simulation Loop
     for i in range(0, int(duration_sec*env.CTRL_FREQ)):
+
         # Step the simulation with the contol input provided
         obs, _, _, _, _ = env.step(action)
         
@@ -136,22 +137,27 @@ def run(
             
             # build a trajectory (12, N+1) from nearest way point
             x_ref_traj = build_ref_traj(path, t_idx, HORIZON_N)
-            update_horizon_visualization(x_ref_traj)
+            # update_horizon_visualization(x_ref_traj)
 
             # compute control action
-            u0 = mpc_control_path(quadcopter, HORIZON_N, x_init, x_ref_traj)
+            # u0 = mpc_control_path(quadcopter, HORIZON_N, x_init, x_ref_traj)
+            u0 = mpc.solve(x_init, x_ref_traj)
             
             # add next control action
             action[j, :] = u0
+
+            # Keep real time synced
+            t_target = t_wall_start + (i + 1) * dt
+            t_now = time.perf_counter()
+            sleep_time = t_target - t_now
+            if sleep_time > 0:
+                time.sleep(sleep_time)
 
         # log actions taken by quadcopters
         for j in range(num_drones):
             logger.log(drone=j,
                        timestamp=i/env.CTRL_FREQ,
                        state=obs[j])
-        
-        # Printout simulation observation (obs)
-        #env.render()
 
     # Close the environment 
     env.close()
@@ -161,7 +167,6 @@ def run(
         plot_3d_from_logger(logger, path)
         logger.plot()
         
-
 
 ########## HELPER FUNCTIONS ##########
 # convert the observations from sim to our states
@@ -224,8 +229,8 @@ def interpolate_path(path, points_per_segment=20):
 
     fine_path.append(path[-1])  # include final point
     return np.array(fine_path)
-
 #######################################
+
 if __name__ == "__main__":
    quadcopter = QuadcopterLinearized()
    run()
