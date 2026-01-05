@@ -1,7 +1,6 @@
-Setup:  
-* Install pybullet  
-* Install gym-pybullet-drones by https://github.com/utiasDSL/gym-pybullet-drones  
-* Make sure to have numpy version 1.26.4 or earlier.  
+Setup:
+* Install pybullet, numpy, scipy and cxvpy
+* Install gym-pybullet-drones and its dependecies with: https://github.com/utiasDSL/gym-pybullet-drones    
 * Launch the main simulation after activating the ```drones``` environment.  
 
 `main_sim.py`:  
