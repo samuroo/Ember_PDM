@@ -47,12 +47,16 @@ def mpc_control_path(quadcopter, N, x_init, x_target, obj_points):
     ])
     # input weight matrix
     R = np.diag([0.1, 5, 5, 0.0])
-    p_close = []
-    s_list = []
-    norm_list = []
+
+
+    p_close = [] # closest point to drone on each object
+    s_list = [] # for soft constraints
+    norm_list = [] # list of normal vectors from p_close to drone
     num_obj = 0
-    filter_dist = 1
+    filter_dist = 1 #metres (how far the drone can "see")
     unique_pairs = np.unique(obj_points[:, :2], axis=0) 
+
+    # runs through each object in simulation (some are represented as links and others as bodies from urdf)
     for body_id, link_id in unique_pairs:
 
         current_points = obj_points[(obj_points[:, 0] == body_id) & (obj_points[:, 1] == link_id)][:, 2:5]
@@ -60,9 +64,10 @@ def mpc_control_path(quadcopter, N, x_init, x_target, obj_points):
         vecs = x_init[:3]-current_points
         closest_idx = np.argmin(np.linalg.norm(vecs, axis=1))
 
-        close_vec = vecs[closest_idx]
+        close_vec = vecs[closest_idx] #vector from p_close to drone
 
-        if np.linalg.norm(close_vec) < filter_dist:
+        # Filtering
+        if np.linalg.norm(close_vec) < filter_dist: 
             normal = close_vec/np.linalg.norm(close_vec)
             p_close.append(current_points[closest_idx])
             norm_list.append(normal)
@@ -96,14 +101,14 @@ def mpc_control_path(quadcopter, N, x_init, x_target, obj_points):
         constraints += [theta <= np.deg2rad(yaw_roll_ang_const)]
 
         # Half space constraints
-        safety_dist = 0.3
-        soft_dist = 0.8
+        safety_dist = 0.3 # metres (distance of half space constraint from object to ensure safety)
+        # soft_dist = 0.5
 
         if num_obj != 0:
             for i in range(num_obj):
                 constraints += [norm_list[i, :].T @ x[:3, k+1] >= norm_list[i, :].T @ p_close[i]]
 
-                
+                #Soft constraints
                 # slack_weight = 1e2
                 # constraints += [norm_list[i, :].T @ x[:3, k+1] >= norm_list[i, :].T @ (p_close[i] + soft_dist*norm_list[i, :]) - s_list[i, k]]  # soft
                 # constraints += [s_list[i, k] >= 0]

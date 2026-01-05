@@ -132,19 +132,15 @@ def run(
     
     #Sampling environment boxes
 
-    ENV_BODY_ID = 2  # hallway_env
+    ENV_BODY_ID = 2  # hallway body id in urdf
 
-    # sample points from all links
+    # sample points from all static environment boxes
     env_points = sample_env_boxes_flat(
         client_id=PYB_CLIENT,
         body_id=ENV_BODY_ID,
-        links=[0,1,2,3,4,5],  # all links in your hallway
-        points_per_link=1000
+        links=[0,1,2,3,4,5],  # all links in the hallway (should update if environment is changed)
+        points_per_link=1000 # number of points sampled per object
     )
-
-    print("Sampled points shape:", env_points.shape)
-    # example row: [body_id, link_id, x, y, z]
-    print(env_points[:5])
 
 
     # Main simulation Loop
@@ -156,6 +152,7 @@ def run(
         # updating moving ellipsoid
         t = i / env.CTRL_FREQ
 
+        # can define motion of ellipsoid here
         ellipsoid_pos = np.array([
             0.4 * t,
             0.5,
@@ -173,7 +170,7 @@ def run(
             ellipsoid_id,
             physicsClientId=PYB_CLIENT
         )
-
+        # sampling points on the ellipsoid surface
         ellipsoid_points = sample_ellipsoid_surface(
             center=np.array(ellipsoid_center),
             radii=radiis[:],
@@ -186,7 +183,7 @@ def run(
             ellipsoid_points                                     # x,y,z
         ])
 
-        # Combine with static environment points
+        # Combining ellipsoid sampled points with static environment points
         all_samples = np.vstack([ellipsoid_points_with_id, env_points])
         
         # Main control
