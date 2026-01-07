@@ -4,9 +4,9 @@ from dataclasses import dataclass
 
 @dataclass
 class RRT3DConfig:
-    step_size: float = 0.5
-    max_iter: int =  2000
-    goal_sample_rate: float = 0.1
+    step_size: float = 0.3
+    max_iter: int =  3000
+    goal_sample_rate: float = 0.2
     goal_threshold: float = 0.5
     n_collision_samples: int = 10
 

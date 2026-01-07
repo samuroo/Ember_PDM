@@ -45,12 +45,12 @@ def draw_box3d(ax, box, color="orange", linewidth=1.2):
 
 
 def solve_rrt_from_urdf(
-        urdf_path="assets/hallway_env1.urdf",
-        start=(4.0, 0.0, 1.0),
-        goal=(-4.0, 0.0, 1.0),
+        urdf_path="assets/DunderMifflin_Scranton.urdf",
+        start=(6.0, -10.0, 0.2),
+        goal=(43, -21.0, 0.2),
         algo_name="basic",
         cfg=None,
-        robot_radius=0.1,
+        robot_radius=0.03,
         visualize=True,
     ):
         """
@@ -134,8 +134,8 @@ def solve_rrt_from_urdf(
         # 6. Choose RRT algorithm (switchable)
         # -------------------------------------------------
         if cfg is None:
-            cfg = RRT3DConfig(step_size=0.5, max_iter=3000, goal_sample_rate=0.1,
-        goal_threshold=0.5, n_collision_samples=10,
+            cfg = RRT3DConfig(step_size=0.2, max_iter=30000, goal_sample_rate=0.2,
+        goal_threshold=0.5, n_collision_samples=8,
         )
 
         # here is the hook to switch algorithms later
