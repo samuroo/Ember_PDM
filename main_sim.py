@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from gym_pybullet_drones.utils.enums import DroneModel, Physics
 from gym_pybullet_drones.envs.CtrlAviary import CtrlAviary
 from gym_pybullet_drones.utils.Logger import Logger
+from scipy.spatial import cKDTree
 
 DEFAULT_DRONES = DroneModel("cf2x")
 DEFAULT_NUM_DRONES = 1
@@ -27,6 +28,8 @@ from enviroment.path_vis import draw_path, update_horizon_visualization
 from global_solver.solve_rrt_3d_from_urdf import solve_rrt_from_urdf
 from global_solver.urdf_to_boxes3d import load_env_and_extract_boxes3d
 import time
+import math
+
 
 # define horizon for MPC controller
 HORIZON_N = 20 
@@ -168,8 +171,10 @@ def run(
         plot_3d_from_logger(logger, path)
         logger.plot()
 
-    print("RMS Tracking Error: " + str(rms_tracking_error(logger, path)))
-        
+        print("Completion percentage: " + str(completion_percentage(logger, path)) + "%")
+        print("Completion time: " + str(t_now - t_wall_start) + " s")
+        print("RMS Tracking Error: " + str(rms_tracking_error(logger, path)*1000) + " mm")
+
 
 ########## HELPER FUNCTIONS ##########
 # convert the observations from sim to our states
@@ -216,6 +221,7 @@ def plot_3d_from_logger(logger, path):
     ax.set_zlabel("Z [m]")
     ax.set_title("Drone trajectory from logger")
     ax.legend()
+    ax.set_aspect('equal')
 
     plt.show(block=False)
 
@@ -253,17 +259,33 @@ def rms_tracking_error(logger, path):
         logger.states[j, 2, :n],
     )).T  # shape (n, 3)
 
-    # Match lengths
-    N = min(len(path), len(drone_pos))
-    drone_pos = drone_pos[:N]
-    ref_pos   = path[:N]
-
     # Euclidean error at each timestep
-    errors = np.linalg.norm(drone_pos - ref_pos, axis=1)
+    errors = np.full(len(drone_pos), np.inf)
+
+    for k in range(len(drone_pos)):
+        for i in range(len(path)):
+            d = math.dist(path[i], drone_pos[k])
+            if errors[k] > d:
+                errors[k] = d
 
     # RMS
     rms = np.sqrt(np.mean(errors**2))
     return rms
+
+
+def completion_percentage(logger, path):
+    drone_last_pos = [logger.states[0, 0, -1],
+                      logger.states[0, 1, -1],
+                      logger.states[0, 2, -1]]
+    min_dst = 999
+    min_point = np.zeros(np.shape(drone_last_pos))
+    percentage = 0
+    for i in range(len(path)):
+        if min_dst > math.dist(path[i], drone_last_pos):
+            min_dst = math.dist(path[i], drone_last_pos)
+            min_point = path[i]
+            percentage = round(i / float(len(path)) * 100)
+    return percentage
 
 #######################################
 
