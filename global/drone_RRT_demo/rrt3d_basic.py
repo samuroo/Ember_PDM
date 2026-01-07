@@ -18,12 +18,12 @@ class RRT3DBasic:
     - draw_callback: function(parent_point, new_point) -> None for live plotting (can be None)
     """
 
-    def __init__(self, start, goal, env, cfg: RRT3DConfig,
-                 draw_callback=None):
+    def __init__(self, start, goal, env, cfg: None, draw_callback=None):
+        self.cfg = cfg if cfg is not None else RRT3DConfig()
+        
         self.start = np.asarray(start, dtype=float)
         self.goal = np.asarray(goal, dtype=float)
         self.env = env
-        self.cfg = cfg
         self.draw_callback = draw_callback
 
         # Vertices and edges

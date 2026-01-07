@@ -3,6 +3,9 @@ import numpy as np
 from urdf_to_boxes3d import load_env_and_extract_boxes3d
 from environment3d import Environment3D, BoxObstacle3D
 from rrt3d_basic import RRT3DBasic, RRT3DConfig
+from rrt3d_star import RRT3DStar, RRT3DStarConfig
+from rrt3d_connect import RRT3DConnect, RRT3DConnectConfig
+from bit_star import BITStar, BITStarConfig
 
 from pathlib import Path
 
@@ -67,7 +70,6 @@ def solve_rrt_from_urdf(
         urdf_path = str(urdf_path)
         
         boxes_raw, bounds = load_env_and_extract_boxes3d(urdf_path)
-
         # Wrap in BoxObstacle3D
         box_obstacles = [
             BoxObstacle3D(*b) for b in boxes_raw
@@ -77,7 +79,17 @@ def solve_rrt_from_urdf(
         # 2. Build Environment3D
         # -------------------------------------------------
         env = Environment3D(box_obstacles, bounds=bounds, robot_radius=robot_radius)
+        
+        xs = [b[0] for b in boxes_raw] + [b[1] for b in boxes_raw]
+        ys = [b[2] for b in boxes_raw] + [b[3] for b in boxes_raw]
+        zs = [b[4] for b in boxes_raw] + [b[5] for b in boxes_raw]
 
+        pad = 0.5
+        xmin, xmax = min(xs) - pad, max(xs) + pad
+        ymin, ymax = min(ys) - pad, max(ys) + pad
+        zmin, zmax = min(zs) - pad, max(zs) + pad
+
+        env.bounds_xyz = ((xmin, xmax), (ymin, ymax), (zmin, zmax))
         # -------------------------------------------------
         # 3. Define start/goal in 3D (inside hallway)
         # -------------------------------------------------
@@ -134,13 +146,25 @@ def solve_rrt_from_urdf(
         # 6. Choose RRT algorithm (switchable)
         # -------------------------------------------------
         if cfg is None:
-            cfg = RRT3DConfig(step_size=0.2, max_iter=30000, goal_sample_rate=0.2,
-        goal_threshold=0.5, n_collision_samples=8,
-        )
+            if algo_name == "basic":
+                cfg = RRT3DConfig(step_size=0.2, max_iter=30000, goal_sample_rate=0.1,
+                    goal_threshold=0.5, n_collision_samples=8)
+            if algo_name == "rrt_star":
+                cfg = RRT3DStarConfig(step_size=0.2, max_iter=30000, goal_sample_rate=0.1,
+                    goal_threshold=0.5, n_collision_samples=8, neighbor_radius=1.0)
+            if algo_name == "rrt_connect":
+                cfg = RRT3DConnectConfig(step_size=1, max_iter=30000,
+                    goal_threshold=0.5, n_collision_samples=15)
+            if algo_name == "bit_star":
+                cfg = BITStarConfig( batch_size=400,max_batches=100, neighbor_radius=5,
+            goal_threshold=2.0, n_collision_samples= 60, anytime=False)
 
         # here is the hook to switch algorithms later
         ALGOS = {
             "basic": RRT3DBasic,
+            "rrt_star": RRT3DStar,
+            "rrt_connect": RRT3DConnect,
+            "bit_star": BITStar,
             # "rrt_star": RRT3DStar,  # e.g. add later
         }
 
@@ -169,7 +193,7 @@ def solve_rrt_from_urdf(
         return path
 
 def main():
-    path = solve_rrt_from_urdf(visualize=True)
+    path = solve_rrt_from_urdf(algo_name="bit_star", visualize=True)
     if path is None:
         print("No path found")
     else:
