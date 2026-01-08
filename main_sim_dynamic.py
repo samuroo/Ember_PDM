@@ -60,7 +60,7 @@ def run(
     goal = (-4.0, 0.0, 1.0)
 
     # SOLVE PATH
-    path = solve_rrt_from_urdf(urdf_path=ENVIROMENT_URDF, start=start, goal=goal, visualize=True)
+    path = solve_rrt_from_urdf(urdf_path=ENVIROMENT_URDF, algo_name="basic", start=start, goal=goal, visualize=False)
     path = interpolate_path(path)
 
     # Init postion (x,y,z) and orientation (roll,pitch,yaw)
@@ -75,6 +75,8 @@ def run(
 
     # FOR TEST PURPOSES - LINEAR PATH
     """
+    TARGET_XYZS = np.array([3,1,2.5])   
+    steps = 120 
     alphas = np.linspace(0.0, 1.0, steps)
     path = (1 - alphas)[:, None] * INIT_XYZS + alphas[:, None] * TARGET_XYZS
     """

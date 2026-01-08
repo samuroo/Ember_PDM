@@ -16,7 +16,7 @@ DEFAULT_USER_DEBUG_GUI = False
 DEFAULT_OBSTACLES = False
 DEFAULT_SIMULATION_FREQ_HZ = 240
 DEFAULT_CONTROL_FREQ_HZ = 48
-DEFAULT_DURATION_SEC = 20
+DEFAULT_DURATION_SEC = 50
 DEFAULT_OUTPUT_FOLDER = 'results'
 DEFAULT_COLAB = False
 
@@ -32,8 +32,8 @@ import math
 # define horizon for MPC controller
 HORIZON_N = 20 
 # define assest enviroment
-# ENVIROMENT_URDF = "assets/hallway_env1.urdf"
-ENVIROMENT_URDF = "assets/DunderMifflin_Scranton.urdf"
+ENVIROMENT_URDF = "assets/hallway_env1.urdf"
+# ENVIROMENT_URDF = "assets/DunderMifflin_Scranton.urdf"
 
 # Main run simulation function
 def run(
@@ -54,14 +54,15 @@ def run(
     
     # DEFINE START & END (depends on enviroment)
     # Hallway URDF
-    # start = (4.0, 0.0, 1.0)
-    # goal = (-4.0, 0.0, 1.0)
+    start = (4.0, 0.0, 1.0)
+    goal = (-4.0, 0.0, 1.0)
     # Dundermiffilan
-    start = (6.0, -10.0, 0.2)
-    goal = (43.0, -21.0, 0.2)
+    # start = (6.0, -10.0, 0.2)
+    # goal = (43.0, -21.0, 0.2)
 
     # SOLVE PATH
-    path = solve_rrt_from_urdf(urdf_path=ENVIROMENT_URDF, start=start, goal=goal, visualize=True)
+    path = solve_rrt_from_urdf(urdf_path=ENVIROMENT_URDF, algo_name="bit_star", start=start, goal=goal, visualize=False)
+    print(path)
     # path = np.array([[6.0, -10.0, 0.2],
     #                 [8.86816879, -10.22716349, 1.43972514],
     #                 [12.29532722, -10.55701498, 1.57014752],
@@ -77,7 +78,7 @@ def run(
     #                 [42.32489361, -18.67963365, 2.06793967],
     #                 [43.36495227, -20.91576101, 0.25684498],
     #                 [43.0, -21.0, 0.2]])
-    path = interpolate_path(path, points_per_segment=15)
+    path = interpolate_path(path, points_per_segment=100)
 
     # Init postion (x,y,z) and orientation (roll,pitch,yaw)
     INIT_XYZS = np.array([start])
@@ -120,13 +121,13 @@ def run(
 
     # Obtain the PyBullet Client ID from the environment
     PYB_CLIENT = env.getPyBulletClient()
-    p.resetDebugVisualizerCamera(
-        cameraDistance=20,
-        cameraYaw=-100,
-        cameraPitch=-2,
-        cameraTargetPosition=[22.5, -12.5, 1.0],
-        physicsClientId=PYB_CLIENT
-    )
+    # p.resetDebugVisualizerCamera(
+    #     cameraDistance=20,
+    #     cameraYaw=-100,
+    #     cameraPitch=-2,
+    #     cameraTargetPosition=[22.5, -12.5, 1.0],
+    #     physicsClientId=PYB_CLIENT
+    # )
 
     # set time variables
     dt = 1.0 / env.CTRL_FREQ

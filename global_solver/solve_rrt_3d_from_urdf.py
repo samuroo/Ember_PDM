@@ -1,11 +1,11 @@
 import numpy as np
 
-from urdf_to_boxes3d import load_env_and_extract_boxes3d
-from environment3d import Environment3D, BoxObstacle3D
-from rrt3d_basic import RRT3DBasic, RRT3DConfig
-from rrt3d_star import RRT3DStar, RRT3DStarConfig
-from rrt3d_connect import RRT3DConnect, RRT3DConnectConfig
-from bit_star import BITStar, BITStarConfig
+from .urdf_to_boxes3d import load_env_and_extract_boxes3d
+from .environment3d import Environment3D, BoxObstacle3D
+from .rrt3d_basic import RRT3DBasic, RRT3DConfig
+from .rrt3d_star import RRT3DStar, RRT3DStarConfig
+from .rrt3d_connect import RRT3DConnect, RRT3DConnectConfig
+from .bit_star import BITStar, BITStarConfig
 
 from pathlib import Path
 
