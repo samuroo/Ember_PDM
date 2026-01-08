@@ -94,7 +94,7 @@ class BITStar:
                 np.random.uniform(ymin, ymax),
                 np.random.uniform(zmin, zmax)
             ])
-        mn, mx = self.env.bounds_xyz
+        mn, mx = self.env.bounds
         return np.random.uniform(mn, mx, size=3)
 
     def _compute_rotation_start_to_goal(self) -> np.ndarray:
