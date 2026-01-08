@@ -4,9 +4,9 @@ from dataclasses import dataclass
 
 @dataclass
 class RRT3DConfig:
-    step_size: float = 0.3
-    max_iter: int =  3000
-    goal_sample_rate: float = 0.2
+    step_size: float = 0.5
+    max_iter: int =  2000
+    goal_sample_rate: float = 0.1
     goal_threshold: float = 0.5
     n_collision_samples: int = 10
 
@@ -18,12 +18,12 @@ class RRT3DBasic:
     - draw_callback: function(parent_point, new_point) -> None for live plotting (can be None)
     """
 
-    def __init__(self, start, goal, env, cfg: None, draw_callback=None):
-        self.cfg = cfg if cfg is not None else RRT3DConfig()
-        
+    def __init__(self, start, goal, env, cfg: RRT3DConfig,
+                 draw_callback=None):
         self.start = np.asarray(start, dtype=float)
         self.goal = np.asarray(goal, dtype=float)
         self.env = env
+        self.cfg = cfg
         self.draw_callback = draw_callback
 
         # Vertices and edges

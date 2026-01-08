@@ -183,17 +183,20 @@ def solve_rrt_from_urdf(
             print("Path found with", path.shape[0], "points.")
 
             # Plot final path in red
-            ax.plot(path[:, 0], path[:, 1], path[:, 2], "r-", linewidth=2.5)
+            if visualize:
+                ax.plot(path[:, 0], path[:, 1], path[:, 2], "r-", linewidth=2.5)
         else:
             print("No path found.")
 
-        plt.ioff()
-        plt.show()
+        if visualize:
+            plt.ioff()
+            plt.show()
 
         return path
 
 def main():
     path = solve_rrt_from_urdf(algo_name="bit_star", visualize=True)
+    print(path)
     if path is None:
         print("No path found")
     else:

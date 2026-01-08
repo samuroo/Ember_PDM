@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 from gym_pybullet_drones.utils.enums import DroneModel, Physics
 from gym_pybullet_drones.envs.CtrlAviary import CtrlAviary
 from gym_pybullet_drones.utils.Logger import Logger
-from scipy.spatial import cKDTree
 
 DEFAULT_DRONES = DroneModel("cf2x")
 DEFAULT_NUM_DRONES = 1
@@ -30,11 +29,11 @@ from global_solver.urdf_to_boxes3d import load_env_and_extract_boxes3d
 import time
 import math
 
-
 # define horizon for MPC controller
 HORIZON_N = 20 
 # define assest enviroment
-ENVIROMENT_URDF = "assets/hallway_env1.urdf"
+# ENVIROMENT_URDF = "assets/hallway_env1.urdf"
+ENVIROMENT_URDF = "assets/DunderMifflin_Scranton.urdf"
 
 # Main run simulation function
 def run(
@@ -54,13 +53,31 @@ def run(
         ):
     
     # DEFINE START & END (depends on enviroment)
-    start = (4.0, 0.0, 1.0)
-    goal = (-4.0, 0.0, 1.0)
+    # Hallway URDF
+    # start = (4.0, 0.0, 1.0)
+    # goal = (-4.0, 0.0, 1.0)
+    # Dundermiffilan
+    start = (6.0, -10.0, 0.2)
+    goal = (43.0, -21.0, 0.2)
 
     # SOLVE PATH
     path = solve_rrt_from_urdf(urdf_path=ENVIROMENT_URDF, start=start, goal=goal, visualize=True)
-    print(path)
-    path = interpolate_path(path)
+    # path = np.array([[6.0, -10.0, 0.2],
+    #                 [8.86816879, -10.22716349, 1.43972514],
+    #                 [12.29532722, -10.55701498, 1.57014752],
+    #                 [16.60426878, -10.09567729, 1.4201732],
+    #                 [19.45248219, -10.10148679, 2.27333807],
+    #                 [23.57344571, -11.5057917, 1.33208137],
+    #                 [26.12102842, -10.98279438, 1.96756315],
+    #                 [30.76361653, -11.67131266, 1.96992723],
+    #                 [35.32434562, -11.77833083, 1.38798129],
+    #                 [38.5300032, -9.31645001, 1.88318695],
+    #                 [40.49709137, -13.09231025, 1.46810967],
+    #                 [39.98965153, -15.07823824, 2.05117431],
+    #                 [42.32489361, -18.67963365, 2.06793967],
+    #                 [43.36495227, -20.91576101, 0.25684498],
+    #                 [43.0, -21.0, 0.2]])
+    path = interpolate_path(path, points_per_segment=15)
 
     # Init postion (x,y,z) and orientation (roll,pitch,yaw)
     INIT_XYZS = np.array([start])
@@ -103,6 +120,13 @@ def run(
 
     # Obtain the PyBullet Client ID from the environment
     PYB_CLIENT = env.getPyBulletClient()
+    p.resetDebugVisualizerCamera(
+        cameraDistance=20,
+        cameraYaw=-100,
+        cameraPitch=-2,
+        cameraTargetPosition=[22.5, -12.5, 1.0],
+        physicsClientId=PYB_CLIENT
+    )
 
     # set time variables
     dt = 1.0 / env.CTRL_FREQ
@@ -144,7 +168,6 @@ def run(
             # update_horizon_visualization(x_ref_traj)
 
             # compute control action
-            # u0 = mpc_control_path(quadcopter, HORIZON_N, x_init, x_ref_traj)
             u0 = mpc.solve(x_init, x_ref_traj)
             
             # add next control action
@@ -175,6 +198,8 @@ def run(
         print("Completion time: " + str(t_now - t_wall_start) + " s")
         print("RMS Tracking Error: " + str(rms_tracking_error(logger, path)*1000) + " mm")
 
+    print("RMS Tracking Error: " + str(rms_tracking_error(logger, path)))
+        
 
 ########## HELPER FUNCTIONS ##########
 # convert the observations from sim to our states
@@ -221,11 +246,10 @@ def plot_3d_from_logger(logger, path):
     ax.set_zlabel("Z [m]")
     ax.set_title("Drone trajectory from logger")
     ax.legend()
-    ax.set_aspect('equal')
 
     plt.show(block=False)
 
-def interpolate_path(path, points_per_segment=20):
+def interpolate_path(path, points_per_segment):
     fine_path = []
 
     for i in range(len(path) - 1):
@@ -271,7 +295,6 @@ def rms_tracking_error(logger, path):
     # RMS
     rms = np.sqrt(np.mean(errors**2))
     return rms
-
 
 def completion_percentage(logger, path):
     drone_last_pos = [logger.states[0, 0, -1],

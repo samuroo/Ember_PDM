@@ -39,7 +39,7 @@ class QuadcopterLinearized:
         # self.R = np.diag([0.1, 5, 5, 0.0])
         # MPC weight matrices
         self.Q = np.diag([
-            40, 40, 10, # x, y, z
+            20, 20, 10, # x, y, z
             10, 10, 0.001, # φ, θ, ψ
             3, 3, 3, # vx, vy, vz
             1.5, 1.5, 0.001 # p, q, r

@@ -1,0 +1,1527 @@
+<?xml version="1.0"?>
+<robot name="DunderMifflin_Scranton">
+
+  <link name="world"/>
+
+  <!-- Common wall parameters used implicitly:
+       thickness = 0.1 m
+       height    = 2.5 m
+       center z  = 1.25 m
+  -->
+
+  <!-- ===============================
+       NORTH WALL
+       Outer edge: (0,0) -> (45,0)
+       (Wall occupies y in [-0.1, 0], matching your earlier convention)
+       =============================== -->
+  <link name="North_Wall">
+    <visual>
+      <origin xyz="22.5 -0.05 1.25" rpy="0 0 0"/>
+      <geometry>
+        <box size="45.0 0.1 2.5"/>
+      </geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="22.5 -0.05 1.25" rpy="0 0 0"/>
+      <geometry><box size="45.0 0.1 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_North_Wall" type="fixed">
+    <parent link="world"/>
+    <child link="North_Wall"/>
+  </joint>
+
+  <!-- ===============================
+       EAST WALL
+       Outer edge: (45,0) -> (45,-25)
+       (Wall occupies x in [44.9, 45.0])
+       =============================== -->
+  <link name="East_Wall">
+    <visual>
+      <origin xyz="44.95 -12.5 1.25" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.1 25.0 2.5"/>
+      </geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="44.95 -12.5 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 25.0 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_East_Wall" type="fixed">
+    <parent link="world"/>
+    <child link="East_Wall"/>
+  </joint>
+
+  <!-- ===============================
+       SOUTH WALL 1
+       Outer edge: (45,-25) -> (26,-25)  length 19
+       =============================== -->
+  <link name="South_Wall_1">
+    <visual>
+      <origin xyz="35.5 -24.95 1.25" rpy="0 0 0"/>
+      <geometry>
+        <box size="19.0 0.1 2.5"/>
+      </geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="35.5 -24.95 1.25" rpy="0 0 0"/>
+      <geometry><box size="19.0 0.1 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_South_Wall_1" type="fixed">
+    <parent link="world"/>
+    <child link="South_Wall_1"/>
+  </joint>
+
+  <!-- ===============================
+       WEST WALL 1 (a small +Y step)
+       Outer edge: (26,-25) -> (26,-24)  length 1
+       =============================== -->
+  <link name="West_Wall_1">
+    <visual>
+      <origin xyz="25.95 -24.5 1.25" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.1 1.0 2.5"/>
+      </geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="25.95 -24.5 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 1.0 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_West_Wall_1" type="fixed">
+    <parent link="world"/>
+    <child link="West_Wall_1"/>
+  </joint>
+
+  <!-- ===============================
+       SOUTH WALL 2
+       Outer edge: (26,-24) -> (13,-24)  length 13
+       =============================== -->
+  <link name="South_Wall_2">
+    <visual>
+      <origin xyz="19.5 -23.95 1.25" rpy="0 0 0"/>
+      <geometry>
+        <box size="13.0 0.1 2.5"/>
+      </geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="19.5 -23.95 1.25" rpy="0 0 0"/>
+      <geometry><box size="13.0 0.1 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_South_Wall_2" type="fixed">
+    <parent link="world"/>
+    <child link="South_Wall_2"/>
+  </joint>
+
+  <!-- ===============================
+       WEST WALL 2 (a small -Y drop)
+       Outer edge: (13,-24) -> (13,-25)  length 1
+       =============================== -->
+  <link name="West_Wall_2">
+    <visual>
+      <origin xyz="13.05 -24.5 1.25" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.1 1.0 2.5"/>
+      </geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="13.05 -24.5 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 1.0 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_West_Wall_2" type="fixed">
+    <parent link="world"/>
+    <child link="West_Wall_2"/>
+  </joint>
+
+  <!-- ===============================
+       SOUTH WALL 3
+       Outer edge: (13,-25) -> (4,-25)  length 9
+       =============================== -->
+  <link name="South_Wall_3">
+    <visual>
+      <origin xyz="8.5 -24.95 1.25" rpy="0 0 0"/>
+      <geometry>
+        <box size="9.0 0.1 2.5"/>
+      </geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="8.5 -24.95 1.25" rpy="0 0 0"/>
+      <geometry><box size="9.0 0.1 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_South_Wall_3" type="fixed">
+    <parent link="world"/>
+    <child link="South_Wall_3"/>
+  </joint>
+
+  <!-- ===============================
+       WEST WALL 3 (big +Y run)
+       Outer edge: (4,-25) -> (4,-5)  length 20
+       =============================== -->
+  <link name="West_Wall_3">
+    <visual>
+      <origin xyz="3.95 -15.0 1.25" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.1 20.0 2.5"/>
+      </geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="3.95 -15.0 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 20.0 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_West_Wall_3" type="fixed">
+    <parent link="world"/>
+    <child link="West_Wall_3"/>
+  </joint>
+
+  <!-- ===============================
+       SOUTH WALL 4
+       Outer edge: (4,-5) -> (0,-5)  length 4
+       (Placed so the boundary is y = -5, consistent closure)
+       =============================== -->
+  <link name="South_Wall_4">
+    <visual>
+      <origin xyz="2.0 -4.95 1.25" rpy="0 0 0"/>
+      <geometry>
+        <box size="4.0 0.1 2.5"/>
+      </geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="2.0 -4.95 1.25" rpy="0 0 0"/>
+      <geometry><box size="4.0 0.1 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_South_Wall_4" type="fixed">
+    <parent link="world"/>
+    <child link="South_Wall_4"/>
+  </joint>
+
+  <!-- ===============================
+       WEST WALL 4 (final +Y to close)
+       Outer edge: (0,-5) -> (0,0)  length 5
+       =============================== -->
+  <link name="West_Wall_4">
+    <visual>
+      <origin xyz="0.05 -2.5 1.25" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.1 5.0 2.5"/>
+      </geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="0.05 -2.5 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 5.0 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_West_Wall_4" type="fixed">
+    <parent link="world"/>
+    <child link="West_Wall_4"/>
+  </joint>
+
+  <!-- ===============================
+       Elevator divider: extends West_Wall_3 upward (in +Y) by 2.5 m
+       Outer face aligned to x = 4 (same as West_Wall_3)
+       Segment: (4,-5) -> (4,-2.5)
+       =============================== -->
+  <link name="Elevator_Div">
+    <visual>
+      <origin xyz="3.95 -3.75 1.25" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.1 2.5 2.5"/>
+      </geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="3.95 -3.75 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 2.5 2.5"/></geometry>
+    </collision>
+  </link>
+
+  <joint name="World_to_Elevator_Div" type="fixed">
+    <parent link="world"/>
+    <child link="Elevator_Div"/>
+  </joint>
+
+  <!-- ===============================
+       Elevator doorway wall pieces along y = -2.5 (outer face on y=-2.5)
+       Total span: x=0 -> 4
+       Left wall:  x=0 -> 1   (full height 2.5)
+       Right wall: x=3 -> 4   (full height 2.5)
+       Header:     x=1 -> 3   (height 0.5, from z=2 to 2.5)
+       =============================== -->
+
+  <!-- Left jamb (full height) -->
+  <link name="Elevator_Doorway_Left">
+    <visual>
+      <origin xyz="0.5 -2.55 1.25" rpy="0 0 0"/>
+      <geometry>
+        <box size="1.0 0.1 2.5"/>
+      </geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="0.5 -2.55 1.25" rpy="0 0 0"/>
+      <geometry><box size="1.0 0.1 2.5"/></geometry>
+    </collision>
+  </link>
+
+  <joint name="World_to_Elevator_Doorway_Left" type="fixed">
+    <parent link="world"/>
+    <child link="Elevator_Doorway_Left"/>
+  </joint>
+
+  <!-- Right jamb (full height) -->
+  <link name="Elevator_Doorway_Right">
+    <visual>
+      <origin xyz="3.5 -2.55 1.25" rpy="0 0 0"/>
+      <geometry>
+        <box size="1.0 0.1 2.5"/>
+      </geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="3.5 -2.55 1.25" rpy="0 0 0"/>
+      <geometry><box size="1.0 0.1 2.5"/></geometry>
+    </collision>
+  </link>
+
+  <joint name="World_to_Elevator_Doorway_Right" type="fixed">
+    <parent link="world"/>
+    <child link="Elevator_Doorway_Right"/>
+  </joint>
+
+  <!-- Header (doorframe top): 2m wide, 0.5m tall -->
+  <link name="Elevator_Doorway">
+    <visual>
+      <!-- spans x=1..3, y thickness 0.1, z=2..2.5 -->
+      <origin xyz="2.0 -2.55 2.25" rpy="0 0 0"/>
+      <geometry>
+        <box size="2.0 0.1 0.5"/>
+      </geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="2.0 -2.55 2.25" rpy="0 0 0"/>
+      <geometry><box size="2.0 0.1 0.5"/></geometry>
+    </collision>
+  </link>
+
+  <joint name="World_to_Elevator_Doorway" type="fixed">
+    <parent link="world"/>
+    <child link="Elevator_Doorway"/>
+  </joint>
+
+  <!-- ===============================
+       HALLWAY EXIT (doorframe)
+       Along x=4, from y=-2.5 to y=0 (length 2.5)
+       Door width 0.8, centered -> jambs 0.85 each, header 0.5 tall
+       Outer face on x=4 => center x = 3.95
+       =============================== -->
+
+  <!-- Lower jamb -->
+  <link name="Hallway_Exit_Lower">
+    <visual>
+      <origin xyz="3.95 -2.075 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 0.85 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="3.95 -2.075 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 0.85 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_Hallway_Exit_Lower" type="fixed">
+    <parent link="world"/><child link="Hallway_Exit_Lower"/>
+  </joint>
+
+  <!-- Upper jamb -->
+  <link name="Hallway_Exit_Upper">
+    <visual>
+      <origin xyz="3.95 -0.425 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 0.85 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="3.95 -0.425 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 0.85 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_Hallway_Exit_Upper" type="fixed">
+    <parent link="world"/><child link="Hallway_Exit_Upper"/>
+  </joint>
+
+  <!-- Header (the “doorframe” top) -->
+  <link name="Hallway_Exit">
+    <visual>
+      <origin xyz="3.95 -1.25 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 0.8 0.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="3.95 -1.25 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 0.8 0.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_Hallway_Exit" type="fixed">
+    <parent link="world"/><child link="Hallway_Exit"/>
+  </joint>
+
+  <!-- ===============================
+       Vertical interior walls from North down (-Y), ~6m
+       Center y = -3.05, length y = 6  => y-range [-6.05, -0.05]
+       =============================== -->
+
+  <link name="pres-hall">
+    <visual>
+      <origin xyz="7.0 -3.05 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 6.0 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="7.0 -3.05 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 6.0 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_pres-hall" type="fixed">
+    <parent link="world"/><child link="pres-hall"/>
+  </joint>
+
+  <link name="pres-cf">
+    <visual>
+      <origin xyz="13.0 -3.05 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 6.0 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="13.0 -3.05 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 6.0 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_pres-cf" type="fixed">
+    <parent link="world"/><child link="pres-cf"/>
+  </joint>
+
+  <!-- cf-stairs aligned with West_Wall_1 outer line x=26 -->
+  <link name="cf-stairs">
+    <visual>
+      <origin xyz="25.95 -3.05 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 6.0 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="25.95 -3.05 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 6.0 2.5"/></geometry>
+    </collision>
+  </link>
+
+  <joint name="world_to_cf-stairs" type="fixed">
+    <parent link="world"/><child link="cf-stairs"/>
+  </joint>
+
+<!-- ===============================
+       MAIN ENTRANCE (doorframe)
+       Along y=-2.5 from x=4 to x=7 (length 3)
+       Door width 0.8, centered -> jambs 1.1 each, header 0.5 tall
+       Outer face on y=-2.5 => center y = -2.55
+       =============================== -->
+
+  <!-- Left jamb: x=4 -> 5.1 (1.1m) -->
+  <link name="Main_Entrance_Left">
+    <visual>
+      <origin xyz="4.55 -2.55 1.25" rpy="0 0 0"/>
+      <geometry><box size="1.1 0.1 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="4.55 -2.55 1.25" rpy="0 0 0"/>
+      <geometry><box size="1.1 0.1 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_Main_Entrance_Left" type="fixed">
+    <parent link="world"/><child link="Main_Entrance_Left"/>
+  </joint>
+
+  <!-- Right jamb: x=5.9 -> 7.0 (1.1m) -->
+  <link name="Main_Entrance_Right">
+    <visual>
+      <origin xyz="6.45 -2.55 1.25" rpy="0 0 0"/>
+      <geometry><box size="1.1 0.1 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="6.45 -2.55 1.25" rpy="0 0 0"/>
+      <geometry><box size="1.1 0.1 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_Main_Entrance_Right" type="fixed">
+    <parent link="world"/><child link="Main_Entrance_Right"/>
+  </joint>
+
+  <!-- Header: x=5.1 -> 5.9 (0.8m), z=2 -> 2.5 -->
+  <link name="Main_Entrance">
+    <visual>
+      <origin xyz="5.5 -2.55 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.8 0.1 0.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="5.5 -2.55 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.8 0.1 0.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_Main_Entrance" type="fixed">
+    <parent link="world"/><child link="Main_Entrance"/>
+  </joint>
+
+  <!-- ===============================
+       pres-off: closes pres-hall to pres-cf at the free ends
+       Along y = -6.05 (matches the bottom of those walls)
+       Span x=7 -> 13 (6m)
+       Door opening 0.8m at x=12.2 -> 13.0 (right next to pres-cf)
+       Outer face on y=-6.05 => center y = -6.10
+       =============================== -->
+
+  <!-- Solid segment (full height) -->
+  <link name="pres-off_solid">
+    <visual>
+      <origin xyz="9.6 -6.10 1.25" rpy="0 0 0"/>
+      <geometry><box size="5.2 0.1 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="9.6 -6.10 1.25" rpy="0 0 0"/>
+      <geometry><box size="5.2 0.1 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_pres-off_solid" type="fixed">
+    <parent link="world"/><child link="pres-off_solid"/>
+  </joint>
+
+  <!-- Header over the door opening -->
+  <link name="pres-off">
+    <visual>
+      <origin xyz="12.6 -6.10 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.8 0.1 0.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="12.6 -6.10 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.8 0.1 0.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_pres-off" type="fixed">
+    <parent link="world"/><child link="pres-off"/>
+  </joint>
+
+  <!-- ===============================
+       UPDATED cf-off: closes pres-cf to cf-stairs (cf-stairs now at x=26)
+       Along y = -6.05
+       Span x=13 -> 26 (13m)
+       Door opening 0.8m at x=13.0 -> 13.8 (right next to pres-cf)
+       Outer face on y=-6.05 => center y = -6.10
+       =============================== -->
+
+  <!-- Solid segment (full height): x=13.8 -> 26.0 -->
+  <link name="cf-off_solid">
+    <visual>
+      <origin xyz="19.9 -6.10 1.25" rpy="0 0 0"/>
+      <geometry><box size="12.2 0.1 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="19.9 -6.10 1.25" rpy="0 0 0"/>
+      <geometry><box size="12.2 0.1 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_cf-off_solid" type="fixed">
+    <parent link="world"/><child link="cf-off_solid"/>
+  </joint>
+
+  <!-- Header over the door opening: x=13.0 -> 13.8 -->
+  <link name="cf-off">
+    <visual>
+      <origin xyz="13.4 -6.10 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.8 0.1 0.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="13.4 -6.10 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.8 0.1 0.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_cf-off" type="fixed">
+    <parent link="world"/><child link="cf-off"/>
+  </joint>
+
+  <!-- ===============================
+       acc-div: from (4,-15) to (9,-15), 5m long in +X
+       Height 1.5m (center z = 0.75)
+       Outer face on y=-15 => center y = -15.05
+       =============================== -->
+  <link name="acc-div">
+    <visual>
+      <origin xyz="6.5 -15.05 0.75" rpy="0 0 0"/>
+      <geometry><box size="5.0 0.1 1.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="6.5 -15.05 0.75" rpy="0 0 0"/>
+      <geometry><box size="5.0 0.1 1.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_acc-div" type="fixed">
+    <parent link="world"/><child link="acc-div"/>
+  </joint>
+
+  <!-- ===============================
+       Corrected Pillars (1m x 1m)
+       Pillar 1: west face touches acc-div east face (x=9)
+                => center x = 9.5
+       Both pillars share the same y centerline as acc-div: y = -15.05
+       =============================== -->
+
+  <link name="pillar_1">
+    <visual>
+      <origin xyz="9.5 -15.05 1.25" rpy="0 0 0"/>
+      <geometry><box size="1.0 1.0 2.5"/></geometry>
+      <material name="pillar_gray"><color rgba="0.6 0.6 0.6 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="9.5 -15.05 1.25" rpy="0 0 0"/>
+      <geometry><box size="1.0 1.0 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_pillar_1" type="fixed">
+    <parent link="world"/><child link="pillar_1"/>
+  </joint>
+
+  <link name="pillar_2">
+    <visual>
+      <origin xyz="17.0 -15.05 1.25" rpy="0 0 0"/>
+      <geometry><box size="1.0 1.0 2.5"/></geometry>
+      <material name="pillar_gray"><color rgba="0.6 0.6 0.6 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="17.0 -15.05 1.25" rpy="0 0 0"/>
+      <geometry><box size="1.0 1.0 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_pillar_2" type="fixed">
+    <parent link="world"/><child link="pillar_2"/>
+  </joint>
+
+<!-- ===============================
+       Along x=26 line (center x=25.95), from y=-6.05 down to y=-24
+       Door gaps: [-6.05,-6.85] and [-10.85,-11.65] (each 0.8)
+       off-stairs wall: [-6.85,-10.85] (4.0)
+       off-kitch wall:  [-11.65,-24.0] (12.35)
+       =============================== -->
+
+  <!-- Doorway 1 header -->
+  <link name="off-stairs_doorway_1">
+    <visual>
+      <origin xyz="25.95 -6.45 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 0.8 0.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="25.95 -6.45 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 0.8 0.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_off-stairs_doorway_1" type="fixed">
+    <parent link="world"/><child link="off-stairs_doorway_1"/>
+  </joint>
+
+  <!-- off-stairs (4m section) -->
+  <link name="off-stairs">
+    <visual>
+      <origin xyz="25.95 -8.85 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 4.0 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="25.95 -8.85 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 4.0 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_off-stairs" type="fixed">
+    <parent link="world"/><child link="off-stairs"/>
+  </joint>
+
+  <!-- Doorway 2 header -->
+  <link name="off-kitch_doorway_2">
+    <visual>
+      <origin xyz="25.95 -11.25 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 0.8 0.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="25.95 -11.25 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 0.8 0.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_off-kitch_doorway_2" type="fixed">
+    <parent link="world"/><child link="off-kitch_doorway_2"/>
+  </joint>
+
+  <!-- off-kitch (remaining wall down to West_Wall_1 region) -->
+  <link name="off-kitch">
+    <visual>
+      <origin xyz="25.95 -17.825 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 12.35 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="25.95 -17.825 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 12.35 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_off-kitch" type="fixed">
+    <parent link="world"/><child link="off-kitch"/>
+  </joint>
+
+  <!-- vp-off-west (UPDATED): 5m in +Y from y=-24 to y=-19 (builds off South_Wall_2)
+       West face aligned to Pillar 2 west face (x=16.5) => center x=16.55
+  -->
+  <link name="vp-off-west">
+    <visual>
+      <origin xyz="16.55 -21.5 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 5.0 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="16.55 -21.5 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 5.0 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_vp-off-west" type="fixed">
+    <parent link="world"/><child link="vp-off-west"/>
+  </joint>
+
+    <!-- vp-off-north (UPDATED): from x=16.55 to x=26 at y=-19 (length 9.45)
+       Door 0.8m centered, header only, solids on both sides.
+       Outer face on y=-19 => center y=-19.05
+  -->
+
+  <!-- Left solid segment -->
+  <link name="vp-off-north_left">
+    <visual>
+      <origin xyz="18.7125 -19.05 1.25" rpy="0 0 0"/>
+      <geometry><box size="4.325 0.1 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="18.7125 -19.05 1.25" rpy="0 0 0"/>
+      <geometry><box size="4.325 0.1 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_vp-off-north_left" type="fixed">
+    <parent link="world"/><child link="vp-off-north_left"/>
+  </joint>
+
+  <!-- Right solid segment -->
+  <link name="vp-off-north_right">
+    <visual>
+      <origin xyz="23.8375 -19.05 1.25" rpy="0 0 0"/>
+      <geometry><box size="4.325 0.1 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="23.8375 -19.05 1.25" rpy="0 0 0"/>
+      <geometry><box size="4.325 0.1 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_vp-off-north_right" type="fixed">
+    <parent link="world"/><child link="vp-off-north_right"/>
+  </joint>
+
+  <!-- Door header (centered) -->
+  <link name="vp-off-north">
+    <visual>
+      <origin xyz="21.275 -19.05 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.8 0.1 0.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="21.275 -19.05 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.8 0.1 0.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_vp-off-north" type="fixed">
+    <parent link="world"/><child link="vp-off-north"/>
+  </joint>
+
+    <!-- stairs-kitch: along y=-7.45 from x=26 to x=36 (10m) -->
+  <link name="stairs-kitch">
+    <visual>
+      <origin xyz="31.0 -7.50 1.25" rpy="0 0 0"/>
+      <geometry><box size="10.0 0.1 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="31.0 -7.50 1.25" rpy="0 0 0"/>
+      <geometry><box size="10.0 0.1 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_stairs-kitch" type="fixed">
+    <parent link="world"/><child link="stairs-kitch"/>
+  </joint>
+
+  <!-- stairs-annex: along x=36 up to North wall (y=0), with doorway centered at y=-1.0 -->
+  <!-- Lower solid segment: y=-7.45 -> -1.40 (6.05m) -->
+  <link name="stairs-annex_lower">
+    <visual>
+      <origin xyz="35.95 -4.425 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 6.05 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="35.95 -4.425 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 6.05 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_stairs-annex_lower" type="fixed">
+    <parent link="world"/><child link="stairs-annex_lower"/>
+  </joint>
+
+  <!-- Upper solid segment: y=-0.60 -> 0.00 (0.60m) -->
+  <link name="stairs-annex_upper">
+    <visual>
+      <origin xyz="35.95 -0.30 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 0.6 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="35.95 -0.30 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 0.6 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_stairs-annex_upper" type="fixed">
+    <parent link="world"/><child link="stairs-annex_upper"/>
+  </joint>
+
+  <!-- Door header (opening y=-1.4..-0.6, centered y=-1.0) -->
+  <link name="stairs-annex">
+    <visual>
+      <origin xyz="35.95 -1.00 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 0.8 0.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="35.95 -1.00 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 0.8 0.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_stairs-annex" type="fixed">
+    <parent link="world"/><child link="stairs-annex"/>
+  </joint>
+
+      <!-- stairs-west (UPDATED): 5m in +Y starting at y=-7.45, x=28 line -->
+  <!-- spans y=-7.45 -> -2.45, so center y=-4.95 -->
+  <link name="stairs-west">
+    <visual>
+      <origin xyz="27.95 -4.95 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 5.0 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="27.95 -4.95 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 5.0 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_stairs-west" type="fixed">
+    <parent link="world"/><child link="stairs-west"/>
+  </joint>
+
+  <!-- stairs-east (UPDATED): 5m in +Y starting at y=-7.45, x=34 line -->
+  <!-- spans y=-7.45 -> -2.45, so center y=-4.95 -->
+  <link name="stairs-east">
+    <visual>
+      <origin xyz="33.95 -4.95 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 5.0 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="33.95 -4.95 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 5.0 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_stairs-east" type="fixed">
+    <parent link="world"/><child link="stairs-east"/>
+  </joint>
+
+  <!-- stairs-tip (UPDATED): attaches to free end of stairs-east at y=-2.45 and runs 2m in -X -->
+  <!-- span x=32 -> 34, outer face on y=-2.45 => center y=-2.50 -->
+  <link name="stairs-tip">
+    <visual>
+      <origin xyz="33.0 -2.50 1.25" rpy="0 0 0"/>
+      <geometry><box size="2.0 0.1 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="33.0 -2.50 1.25" rpy="0 0 0"/>
+      <geometry><box size="2.0 0.1 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_stairs-tip" type="fixed">
+    <parent link="world"/><child link="stairs-tip"/>
+  </joint>
+
+
+    <!-- sto-ent (UPDATED): lowered 3m in Y -->
+  <!-- Doorway along y=-5.0 from x=34 to x=36 (2m), door centered -->
+  <!-- Outer face on y=-5.0 => center y = -5.05 -->
+
+  <!-- Left jamb -->
+  <link name="sto-ent_left">
+    <visual>
+      <origin xyz="34.3 -5.05 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.6 0.1 2.5"/></geometry>
+      <material name="wall_white">
+        <color rgba="0.9 0.9 0.9 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="34.3 -5.05 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.6 0.1 2.5"/></geometry>
+    </collision>
+  </link>
+
+  <joint name="world_to_sto-ent_left" type="fixed">
+    <parent link="world"/>
+    <child link="sto-ent_left"/>
+  </joint>
+
+  <!-- Right jamb -->
+  <link name="sto-ent_right">
+    <visual>
+      <origin xyz="35.7 -5.05 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.6 0.1 2.5"/></geometry>
+      <material name="wall_white">
+        <color rgba="0.9 0.9 0.9 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="35.7 -5.05 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.6 0.1 2.5"/></geometry>
+    </collision>
+  </link>
+
+  <joint name="world_to_sto-ent_right" type="fixed">
+    <parent link="world"/>
+    <child link="sto-ent_right"/>
+  </joint>
+
+  <!-- Door header -->
+  <link name="sto-ent">
+    <visual>
+      <origin xyz="35.0 -5.05 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.8 0.1 0.5"/></geometry>
+      <material name="wall_white">
+        <color rgba="0.9 0.9 0.9 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="35.0 -5.05 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.8 0.1 0.5"/></geometry>
+    </collision>
+  </link>
+
+  <joint name="world_to_sto-ent" type="fixed">
+    <parent link="world"/>
+    <child link="sto-ent"/>
+  </joint>
+
+  <!-- ===============================
+       kitch-bath: along y=-12.25 (outer face), spanning x=26..36 (10m)
+       3 doors (0.8m) evenly spaced, one centered.
+       Outer jambs are 1.5m from each end.
+       =============================== -->
+
+  <!-- Solid A: x=26.0 -> 27.5 (1.5m) -->
+  <link name="kitch-bath_A">
+    <visual>
+      <origin xyz="26.75 -13.80 1.25" rpy="0 0 0"/>
+      <geometry><box size="1.5 0.1 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="26.75 -13.80 1.25" rpy="0 0 0"/>
+      <geometry><box size="1.5 0.1 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_kitch-bath_A" type="fixed">
+    <parent link="world"/><child link="kitch-bath_A"/>
+  </joint>
+
+  <!-- Solid B: x=28.3 -> 30.6 (2.3m) -->
+  <link name="kitch-bath_B">
+    <visual>
+      <origin xyz="29.45 -13.80 1.25" rpy="0 0 0"/>
+      <geometry><box size="2.3 0.1 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="29.45 -13.80 1.25" rpy="0 0 0"/>
+      <geometry><box size="2.3 0.1 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_kitch-bath_B" type="fixed">
+    <parent link="world"/><child link="kitch-bath_B"/>
+  </joint>
+
+  <!-- Solid C: x=31.4 -> 33.7 (2.3m) -->
+  <link name="kitch-bath_C">
+    <visual>
+      <origin xyz="32.55 -13.80 1.25" rpy="0 0 0"/>
+      <geometry><box size="2.3 0.1 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="32.55 -13.80 1.25" rpy="0 0 0"/>
+      <geometry><box size="2.3 0.1 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_kitch-bath_C" type="fixed">
+    <parent link="world"/><child link="kitch-bath_C"/>
+  </joint>
+
+  <!-- Solid D: x=34.5 -> 36.0 (1.5m) -->
+  <link name="kitch-bath_D">
+    <visual>
+      <origin xyz="35.25 -13.80 1.25" rpy="0 0 0"/>
+      <geometry><box size="1.5 0.1 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="35.25 -13.80 1.25" rpy="0 0 0"/>
+      <geometry><box size="1.5 0.1 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_kitch-bath_D" type="fixed">
+    <parent link="world"/><child link="kitch-bath_D"/>
+  </joint>
+
+  <!-- Door headers (3 doors): x=27.9, 31.0, 34.1 -->
+  <link name="kitch-bath_door_1">
+    <visual>
+      <origin xyz="27.9 -13.80 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.8 0.1 0.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="27.9 -13.80 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.8 0.1 0.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_kitch-bath_door_1" type="fixed">
+    <parent link="world"/><child link="kitch-bath_door_1"/>
+  </joint>
+
+  <link name="kitch-bath_door_2">
+    <visual>
+      <origin xyz="31.0 -13.80 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.8 0.1 0.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="31.0 -13.80 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.8 0.1 0.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_kitch-bath_door_2" type="fixed">
+    <parent link="world"/><child link="kitch-bath_door_2"/>
+  </joint>
+
+  <link name="kitch-bath_door_3">
+    <visual>
+      <origin xyz="34.1 -13.80 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.8 0.1 0.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="34.1 -13.80 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.8 0.1 0.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_kitch-bath_door_3" type="fixed">
+    <parent link="world"/><child link="kitch-bath_door_3"/>
+  </joint>
+
+  <!-- ===============================
+       bath-annex: along x=36 line (outer face), from y=0 down to y=-25
+       Door centered at y=-11.25 (1m higher than the junction y=-12.25)
+       Door width 0.8 in Y, header only (z=2..2.5)
+       =============================== -->
+
+  <!-- Top solid: y=0 -> -10.85 (10.85m) -->
+  <link name="bath-annex_top">
+    <visual>
+      <origin xyz="35.95 -5.425 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 10.85 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="35.95 -5.425 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 10.85 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_bath-annex_top" type="fixed">
+    <parent link="world"/><child link="bath-annex_top"/>
+  </joint>
+
+  <!-- Bottom solid: y=-11.65 -> -25.0 (13.35m) -->
+  <link name="bath-annex_bottom">
+    <visual>
+      <origin xyz="35.95 -18.325 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 13.35 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="35.95 -18.325 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 13.35 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_bath-annex_bottom" type="fixed">
+    <parent link="world"/><child link="bath-annex_bottom"/>
+  </joint>
+
+  <!-- Door header at y=-11.25 -->
+  <link name="bath-annex">
+    <visual>
+      <origin xyz="35.95 -11.25 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 0.8 0.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="35.95 -11.25 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 0.8 0.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_bath-annex" type="fixed">
+    <parent link="world"/><child link="bath-annex"/>
+  </joint>
+
+  <!-- break-annex_west: x=40 line, from y=0 to y=-9 -->
+  <link name="break-annex_west">
+    <visual>
+      <origin xyz="39.95 -4.5 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 9.0 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="39.95 -4.5 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 9.0 2.5"/></geometry>
+    </collision>
+  </link>
+
+  <joint name="world_to_break-annex_west" type="fixed">
+    <parent link="world"/>
+    <child link="break-annex_west"/>
+  </joint>
+
+  <!-- annex-break-south: from x=40 to x=45 at y=-9, door against break-annex_west -->
+  <!-- Solid segment: x=40.8 -> 45.0 (4.2m) -->
+  <link name="annex-break-south_solid">
+    <visual>
+      <origin xyz="42.9 -9.05 1.25" rpy="0 0 0"/>
+      <geometry><box size="4.2 0.1 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="42.9 -9.05 1.25" rpy="0 0 0"/>
+      <geometry><box size="4.2 0.1 2.5"/></geometry>
+    </collision>
+  </link>
+
+  <joint name="world_to_annex-break-south_solid" type="fixed">
+    <parent link="world"/>
+    <child link="annex-break-south_solid"/>
+  </joint>
+
+  <!-- Door header over opening: x=40.0 -> 40.8 -->
+  <link name="annex-break-south">
+    <visual>
+      <origin xyz="40.4 -9.05 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.8 0.1 0.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="40.4 -9.05 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.8 0.1 0.5"/></geometry>
+    </collision>
+  </link>
+
+  <joint name="world_to_annex-break-south" type="fixed">
+    <parent link="world"/>
+    <child link="annex-break-south"/>
+  </joint>
+
+  <!-- ===============================
+       Cubicle walls (height 1.5m), attached to East wall (x=45)
+       Base line is 2m above South_Wall_1: y = -23
+       Thickness = 0.1, Height = 1.5 (center z = 0.75)
+       =============================== -->
+
+  <!-- Wall A: from (45,-23) to (41,-23), 4m in -X -->
+  <link name="cubicle_wall_A">
+    <visual>
+      <origin xyz="43.0 -23.05 0.75" rpy="0 0 0"/>
+      <geometry><box size="4.0 0.1 1.5"/></geometry>
+      <material name="cubicle_gray"><color rgba="0.75 0.75 0.75 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="43.0 -23.05 0.75" rpy="0 0 0"/>
+      <geometry><box size="4.0 0.1 1.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_cubicle_wall_A" type="fixed">
+    <parent link="world"/><child link="cubicle_wall_A"/>
+  </joint>
+
+  <!-- Wall B: from (41,-23) to (41,-21.5), 1.5m in +Y -->
+  <link name="cubicle_wall_B">
+    <visual>
+      <origin xyz="40.95 -22.25 0.75" rpy="0 0 0"/>
+      <geometry><box size="0.1 1.5 1.5"/></geometry>
+      <material name="cubicle_gray"><color rgba="0.75 0.75 0.75 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="40.95 -22.25 0.75" rpy="0 0 0"/>
+      <geometry><box size="0.1 1.5 1.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_cubicle_wall_B" type="fixed">
+    <parent link="world"/><child link="cubicle_wall_B"/>
+  </joint>
+
+  <!-- Gap of 1.5m in Y: (41,-21.5) to (41,-20.0) -->
+
+  <!-- Wall C: from (41,-20.0) to (41,-18.5), 1.5m in +Y -->
+  <link name="cubicle_wall_C">
+    <visual>
+      <origin xyz="40.95 -19.25 0.75" rpy="0 0 0"/>
+      <geometry><box size="0.1 1.5 1.5"/></geometry>
+      <material name="cubicle_gray"><color rgba="0.75 0.75 0.75 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="40.95 -19.25 0.75" rpy="0 0 0"/>
+      <geometry><box size="0.1 1.5 1.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_cubicle_wall_C" type="fixed">
+    <parent link="world"/><child link="cubicle_wall_C"/>
+  </joint>
+
+  <!-- Wall D: connects back to East wall: from (41,-18.5) to (45,-18.5), 4m in +X -->
+  <link name="cubicle_wall_D">
+    <visual>
+      <origin xyz="43.0 -18.55 0.75" rpy="0 0 0"/>
+      <geometry><box size="4.0 0.1 1.5"/></geometry>
+      <material name="cubicle_gray"><color rgba="0.75 0.75 0.75 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="43.0 -18.55 0.75" rpy="0 0 0"/>
+      <geometry><box size="4.0 0.1 1.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_cubicle_wall_D" type="fixed">
+    <parent link="world"/><child link="cubicle_wall_D"/>
+  </joint>
+
+  <!-- ===============================
+       bath-div: parallel to kitch-bath, same span x=26..36 (10m)
+       3m lower in Y than kitch-bath:
+         kitch-bath outer face y=-13.75  -> bath-div outer face y=-16.75
+         center y = -16.80
+       Doors: only outer doors (same positions as kitch-bath), no middle door
+       =============================== -->
+
+  <!-- Solid A: x=26.0 -> 27.5 (1.5m) -->
+  <link name="bath-div_A">
+    <visual>
+      <origin xyz="26.75 -16.80 1.25" rpy="0 0 0"/>
+      <geometry><box size="1.5 0.1 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="26.75 -16.80 1.25" rpy="0 0 0"/>
+      <geometry><box size="1.5 0.1 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_bath-div_A" type="fixed">
+    <parent link="world"/><child link="bath-div_A"/>
+  </joint>
+
+  <!-- Solid B: x=28.3 -> 33.7 (5.4m) -->
+  <link name="bath-div_B">
+    <visual>
+      <origin xyz="31.0 -16.80 1.25" rpy="0 0 0"/>
+      <geometry><box size="5.4 0.1 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="31.0 -16.80 1.25" rpy="0 0 0"/>
+      <geometry><box size="5.4 0.1 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_bath-div_B" type="fixed">
+    <parent link="world"/><child link="bath-div_B"/>
+  </joint>
+
+  <!-- Solid C: x=34.5 -> 36.0 (1.5m) -->
+  <link name="bath-div_C">
+    <visual>
+      <origin xyz="35.25 -16.80 1.25" rpy="0 0 0"/>
+      <geometry><box size="1.5 0.1 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="35.25 -16.80 1.25" rpy="0 0 0"/>
+      <geometry><box size="1.5 0.1 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_bath-div_C" type="fixed">
+    <parent link="world"/><child link="bath-div_C"/>
+  </joint>
+
+  <!-- Door headers (outer doors only) -->
+  <link name="bath-div_door_1">
+    <visual>
+      <origin xyz="27.9 -16.80 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.8 0.1 0.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="27.9 -16.80 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.8 0.1 0.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_bath-div_door_1" type="fixed">
+    <parent link="world"/><child link="bath-div_door_1"/>
+  </joint>
+
+  <link name="bath-div_door_3">
+    <visual>
+      <origin xyz="34.1 -16.80 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.8 0.1 0.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="34.1 -16.80 2.25" rpy="0 0 0"/>
+      <geometry><box size="0.8 0.1 0.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_bath-div_door_3" type="fixed">
+    <parent link="world"/><child link="bath-div_door_3"/>
+  </joint>
+
+  <!-- bath-div2: from y=-16.75 down to y=-25 at x=31 (centered) -->
+  <link name="bath-div2">
+    <visual>
+      <origin xyz="31.0 -20.875 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 8.25 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="31.0 -20.875 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 8.25 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_bath-div2" type="fixed">
+    <parent link="world"/><child link="bath-div2"/>
+  </joint>
+
+  <!-- sto-div_1: x=29.45, from y=-13.75 to y=-16.75 -->
+  <link name="sto-div_1">
+    <visual>
+      <origin xyz="29.45 -15.25 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 3.0 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="29.45 -15.25 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 3.0 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_sto-div_1" type="fixed">
+    <parent link="world"/><child link="sto-div_1"/>
+  </joint>
+
+  <!-- sto-div_2: x=32.55, from y=-13.75 to y=-16.75 -->
+  <link name="sto-div_2">
+    <visual>
+      <origin xyz="32.55 -15.25 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 3.0 2.5"/></geometry>
+      <material name="wall_white"><color rgba="0.9 0.9 0.9 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="32.55 -15.25 1.25" rpy="0 0 0"/>
+      <geometry><box size="0.1 3.0 2.5"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_sto-div_2" type="fixed">
+    <parent link="world"/><child link="sto-div_2"/>
+  </joint>
+
+  <!-- ===============================
+       FLOOR (thickness 0.1) — upper surface at z=0
+       Transparent visuals, solid collisions
+       =============================== -->
+  <material name="floor_clear">
+    <color rgba="0.2 0.7 1.0 0.12"/>
+  </material>
+
+  <!-- Floor 1: x 0..45, y -5..0 -->
+  <link name="Floor_1">
+    <visual>
+      <origin xyz="22.5 -2.5 -0.05" rpy="0 0 0"/>
+      <geometry><box size="45.0 5.0 0.1"/></geometry>
+      <material name="floor_clear"/>
+    </visual>
+    <collision>
+      <origin xyz="22.5 -2.5 -0.05" rpy="0 0 0"/>
+      <geometry><box size="45.0 5.0 0.1"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_Floor_1" type="fixed">
+    <parent link="world"/><child link="Floor_1"/>
+  </joint>
+
+  <!-- Floor 2: x 4..13, y -25..-5 -->
+  <link name="Floor_2">
+    <visual>
+      <origin xyz="8.5 -15.0 -0.05" rpy="0 0 0"/>
+      <geometry><box size="9.0 20.0 0.1"/></geometry>
+      <material name="floor_clear"/>
+    </visual>
+    <collision>
+      <origin xyz="8.5 -15.0 -0.05" rpy="0 0 0"/>
+      <geometry><box size="9.0 20.0 0.1"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_Floor_2" type="fixed">
+    <parent link="world"/><child link="Floor_2"/>
+  </joint>
+
+  <!-- Floor 3: x 13..26, y -24..-5 -->
+  <link name="Floor_3">
+    <visual>
+      <origin xyz="19.5 -14.5 -0.05" rpy="0 0 0"/>
+      <geometry><box size="13.0 19.0 0.1"/></geometry>
+      <material name="floor_clear"/>
+    </visual>
+    <collision>
+      <origin xyz="19.5 -14.5 -0.05" rpy="0 0 0"/>
+      <geometry><box size="13.0 19.0 0.1"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_Floor_3" type="fixed">
+    <parent link="world"/><child link="Floor_3"/>
+  </joint>
+
+  <!-- Floor 4: x 26..45, y -25..-5 -->
+  <link name="Floor_4">
+    <visual>
+      <origin xyz="35.5 -15.0 -0.05" rpy="0 0 0"/>
+      <geometry><box size="19.0 20.0 0.1"/></geometry>
+      <material name="floor_clear"/>
+    </visual>
+    <collision>
+      <origin xyz="35.5 -15.0 -0.05" rpy="0 0 0"/>
+      <geometry><box size="19.0 20.0 0.1"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_Floor_4" type="fixed">
+    <parent link="world"/><child link="Floor_4"/>
+  </joint>
+
+  <!-- ===============================
+       CEILING (thickness 0.1) — lower surface at z=2.5
+       Transparent visuals, solid collisions
+       =============================== -->
+  <material name="ceiling_clear">
+    <color rgba="1.0 0.8 0.2 0.12"/>
+  </material>
+
+  <!-- Ceiling 1: x 0..45, y -5..0 -->
+  <link name="Ceiling_1">
+    <visual>
+      <origin xyz="22.5 -2.5 2.55" rpy="0 0 0"/>
+      <geometry><box size="45.0 5.0 0.1"/></geometry>
+      <material name="ceiling_clear"/>
+    </visual>
+    <collision>
+      <origin xyz="22.5 -2.5 2.55" rpy="0 0 0"/>
+      <geometry><box size="45.0 5.0 0.1"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_Ceiling_1" type="fixed">
+    <parent link="world"/><child link="Ceiling_1"/>
+  </joint>
+
+  <!-- Ceiling 2: x 4..13, y -25..-5 -->
+  <link name="Ceiling_2">
+    <visual>
+      <origin xyz="8.5 -15.0 2.55" rpy="0 0 0"/>
+      <geometry><box size="9.0 20.0 0.1"/></geometry>
+      <material name="ceiling_clear"/>
+    </visual>
+    <collision>
+      <origin xyz="8.5 -15.0 2.55" rpy="0 0 0"/>
+      <geometry><box size="9.0 20.0 0.1"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_Ceiling_2" type="fixed">
+    <parent link="world"/><child link="Ceiling_2"/>
+  </joint>
+
+  <!-- Ceiling 3: x 13..26, y -24..-5 -->
+  <link name="Ceiling_3">
+    <visual>
+      <origin xyz="19.5 -14.5 2.55" rpy="0 0 0"/>
+      <geometry><box size="13.0 19.0 0.1"/></geometry>
+      <material name="ceiling_clear"/>
+    </visual>
+    <collision>
+      <origin xyz="19.5 -14.5 2.55" rpy="0 0 0"/>
+      <geometry><box size="13.0 19.0 0.1"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_Ceiling_3" type="fixed">
+    <parent link="world"/><child link="Ceiling_3"/>
+  </joint>
+
+  <!-- Ceiling 4: x 26..45, y -25..-5 -->
+  <link name="Ceiling_4">
+    <visual>
+      <origin xyz="35.5 -15.0 2.55" rpy="0 0 0"/>
+      <geometry><box size="19.0 20.0 0.1"/></geometry>
+      <material name="ceiling_clear"/>
+    </visual>
+    <collision>
+      <origin xyz="35.5 -15.0 2.55" rpy="0 0 0"/>
+      <geometry><box size="19.0 20.0 0.1"/></geometry>
+    </collision>
+  </link>
+  <joint name="world_to_Ceiling_4" type="fixed">
+    <parent link="world"/><child link="Ceiling_4"/>
+  </joint>
+
+
+</robot>
