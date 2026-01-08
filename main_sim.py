@@ -1,11 +1,15 @@
+# GENERAL IMPORTS
+import time
+import math
+import argparse
 import numpy as np
 import pybullet as p
 import matplotlib.pyplot as plt
-
 from gym_pybullet_drones.utils.enums import DroneModel, Physics
 from gym_pybullet_drones.envs.CtrlAviary import CtrlAviary
 from gym_pybullet_drones.utils.Logger import Logger
 
+# PYBULLET DEFAULT VARIABLES
 DEFAULT_DRONES = DroneModel("cf2x")
 DEFAULT_NUM_DRONES = 1
 DEFAULT_PHYSICS = Physics("pyb")
@@ -20,22 +24,15 @@ DEFAULT_DURATION_SEC = 50
 DEFAULT_OUTPUT_FOLDER = 'results'
 DEFAULT_COLAB = False
 
-# from controllers.controller_path import mpc_control_path
+# AUTHOR CLASS & FUNCTION IMPORTS
 from controllers.controller_path import MPCPathController
 from dynamics.quadcopter_linear import QuadcopterLinearized
 from enviroment.path_vis import draw_path, update_horizon_visualization
 from global_solver.solve_rrt_3d_from_urdf import solve_rrt_from_urdf
 from global_solver.urdf_to_boxes3d import load_env_and_extract_boxes3d
-import time
-import math
 
-# define horizon for MPC controller
-HORIZON_N = 20 
-# define assest enviroment
-ENVIROMENT_URDF = "assets/hallway_env1.urdf"
-# ENVIROMENT_URDF = "assets/DunderMifflin_Scranton.urdf"
 
-# Main run simulation function
+# main run simulation function
 def run(
         drone=DEFAULT_DRONES,
         num_drones=DEFAULT_NUM_DRONES,
@@ -53,56 +50,24 @@ def run(
         ):
     
     # DEFINE START & END (depends on enviroment)
-    # Hallway URDF
-    start = (4.0, 0.0, 1.0)
-    goal = (-4.0, 0.0, 1.0)
-    # Dundermiffilan
-    # start = (6.0, -10.0, 0.2)
-    # goal = (43.0, -21.0, 0.2)
+    if args.env == "floor_plan":
+        start = (6.0, -10.0, 0.2)
+        goal = (43.0, -21.0, 0.2)
+    elif args.env == "hallway":
+        start = (4.0, 0.0, 1.0)
+        goal = (-4.0, 0.0, 1.0)
 
-    # SOLVE PATH
-    path = solve_rrt_from_urdf(urdf_path=ENVIROMENT_URDF, algo_name="bit_star", start=start, goal=goal, visualize=False)
-    print(path)
-    # path = np.array([[6.0, -10.0, 0.2],
-    #                 [8.86816879, -10.22716349, 1.43972514],
-    #                 [12.29532722, -10.55701498, 1.57014752],
-    #                 [16.60426878, -10.09567729, 1.4201732],
-    #                 [19.45248219, -10.10148679, 2.27333807],
-    #                 [23.57344571, -11.5057917, 1.33208137],
-    #                 [26.12102842, -10.98279438, 1.96756315],
-    #                 [30.76361653, -11.67131266, 1.96992723],
-    #                 [35.32434562, -11.77833083, 1.38798129],
-    #                 [38.5300032, -9.31645001, 1.88318695],
-    #                 [40.49709137, -13.09231025, 1.46810967],
-    #                 [39.98965153, -15.07823824, 2.05117431],
-    #                 [42.32489361, -18.67963365, 2.06793967],
-    #                 [43.36495227, -20.91576101, 0.25684498],
-    #                 [43.0, -21.0, 0.2]])
-    path = interpolate_path(path, points_per_segment=100)
-
-    # Init postion (x,y,z) and orientation (roll,pitch,yaw)
+    # Init quadcopter postion (x,y,z) and orientation (roll,pitch,yaw)
     INIT_XYZS = np.array([start])
     INIT_RPYS = np.array([[0, 0, 0]])
 
-    # FOR TEST PURPOSES - LINEAR PATH
-    """
-    TARGET_XYZS = np.array([3,1,2.5])   
-    steps = 120 
-    alphas = np.linspace(0.0, 1.0, steps)
-    path = (1 - alphas)[:, None] * INIT_XYZS + alphas[:, None] * TARGET_XYZS
-    """
-
-    # FOR TEST PURPOSES - CIRCULAR PATH
-    """
-    steps = 120
-    waypoints = np.linspace(0, 7*np.pi/4, steps)
-    R = 1.0
-    xc, yc, zc = INIT_XYZS[0]
-    path = np.zeros((steps, 3))
-    path[:,0] = xc + np.sqrt(R**2/2) + R * np.cos(waypoints + 5*np.pi/4)
-    path[:,1] = yc + np.sqrt(R**2/2) + R * np.sin(waypoints + 5*np.pi/4)
-    path[:,2] = zc
-    """
+    # solve path and interpolate it for MPC
+    if args.env == "floor_plan":
+        path = solve_rrt_from_urdf(urdf_path=ENVIROMENT_URDF, algo_name="bit_star", start=start, goal=goal, visualize=args.vis_global_solver)
+        path = interpolate_path(path, points_per_segment=85)
+    elif args.env == "hallway":
+        path = solve_rrt_from_urdf(urdf_path=ENVIROMENT_URDF, algo_name="basic", start=start, goal=goal, visualize=args.vis_global_solver)
+        path = interpolate_path(path, points_per_segment=10)
 
     # Create the environment
     env = CtrlAviary(drone_model=drone,
@@ -121,32 +86,37 @@ def run(
 
     # Obtain the PyBullet Client ID from the environment
     PYB_CLIENT = env.getPyBulletClient()
-    # p.resetDebugVisualizerCamera(
-    #     cameraDistance=20,
-    #     cameraYaw=-100,
-    #     cameraPitch=-2,
-    #     cameraTargetPosition=[22.5, -12.5, 1.0],
-    #     physicsClientId=PYB_CLIENT
-    # )
 
-    # set time variables
+    # init the logger, camera, and time variables
+    logger = Logger(logging_freq_hz=control_freq_hz, num_drones=num_drones, output_folder=output_folder, colab=colab)
+    if args.env == "floor_plan":
+        p.resetDebugVisualizerCamera(
+            cameraDistance=40,
+            cameraYaw=-107,
+            cameraPitch=-2,
+            cameraTargetPosition=[43.0, -21.0, 0.2],
+            physicsClientId=PYB_CLIENT
+        )
+    elif args.env == "hallway":
+        p.resetDebugVisualizerCamera(
+            cameraDistance=10,
+            cameraYaw=90,
+            cameraPitch=-3,
+            cameraTargetPosition=[-4.0, 0.0, 1.0],
+            physicsClientId=PYB_CLIENT
+        )
     dt = 1.0 / env.CTRL_FREQ
     t_wall_start = time.perf_counter()
 
-    # Init the logger
-    logger = Logger(logging_freq_hz=control_freq_hz, num_drones=num_drones,
-                    output_folder=output_folder, colab=colab)
-
-    # Init input control array
-    action = np.zeros((num_drones,4))
-
-    # Draw the path visualy 
+    # draw the path in the pybullet enviroment and add the collision boxes
     draw_path(path)
+    load_env_and_extract_boxes3d("global_solver/" + ENVIROMENT_URDF)
 
-    # add collsiion boxes
-    load_env_and_extract_boxes3d("global_solver/"+ ENVIROMENT_URDF)
-
+    # init MPC controller
     mpc = MPCPathController(quadcopter, HORIZON_N)
+
+    # init input control array
+    action = np.zeros((num_drones,4))
 
     # Main simulation Loop
     for i in range(0, int(duration_sec*env.CTRL_FREQ)):
@@ -166,7 +136,10 @@ def run(
             
             # build a trajectory (12, N+1) from nearest way point
             x_ref_traj = build_ref_traj(path, t_idx, HORIZON_N)
-            # update_horizon_visualization(x_ref_traj)
+
+            # visualize the MPC horzion (slows down sim)
+            if args.vis_horizon:
+                update_horizon_visualization(x_ref_traj)
 
             # compute control action
             u0 = mpc.solve(x_init, x_ref_traj)
@@ -196,11 +169,8 @@ def run(
         logger.plot()
 
         print("Completion percentage: " + str(completion_percentage(logger, path)) + "%")
-        print("Completion time: " + str(t_now - t_wall_start) + " s")
-        print("RMS Tracking Error: " + str(rms_tracking_error(logger, path)*1000) + " mm")
-
-    print("RMS Tracking Error: " + str(rms_tracking_error(logger, path)))
-        
+        print("Completion time: " + round(str(t_now - t_wall_start)) + " s")
+        print("RMS Tracking Error: " + str(rms_tracking_error(logger, path)*1000) + " mm")        
 
 ########## HELPER FUNCTIONS ##########
 # convert the observations from sim to our states
@@ -312,9 +282,29 @@ def completion_percentage(logger, path):
     return percentage
 
 #######################################
-
 if __name__ == "__main__":
-   quadcopter = QuadcopterLinearized()
-   run()
+    # parse the envrioment argument
+    parser = argparse.ArgumentParser(description="PDM Quadcopter simulation")
+    parser.add_argument("--env", type=str, default="floor_plan", help="Set global enviroment: hallway or floor_plan")
+    parser.add_argument("--vis_horizon", type=bool, default=False)
+    parser.add_argument("--duration", type=float, default=60, help="Set duration of simualtion in seconds.")
+    parser.add_argument("--vis_global_solver", type=bool, default=False)
+
+    args = parser.parse_args()
+
+    # define horizon for MPC controller
+    HORIZON_N = 20 
+
+    # define assest enviroment
+    if args.env == "hallway":
+        ENVIROMENT_URDF = "assets/hallway_env1.urdf"
+    elif args.env == "floor_plan":
+        ENVIROMENT_URDF = "assets/DunderMifflin_Scranton.urdf"
+    else:
+        print("No enviroment for " + args.env)
+        exit()
+
+    quadcopter = QuadcopterLinearized()
+    run(duration_sec=args.duration)
 
 
