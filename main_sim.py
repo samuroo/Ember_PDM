@@ -5,6 +5,7 @@ import argparse
 import numpy as np
 import pybullet as p
 import matplotlib.pyplot as plt
+from statistics import stdev
 from gym_pybullet_drones.utils.enums import DroneModel, Physics
 from gym_pybullet_drones.envs.CtrlAviary import CtrlAviary
 from gym_pybullet_drones.utils.Logger import Logger
@@ -15,7 +16,7 @@ DEFAULT_NUM_DRONES = 1
 DEFAULT_PHYSICS = Physics("pyb")
 DEFAULT_GUI = True
 DEFAULT_RECORD_VISION = False
-DEFAULT_PLOT = True
+DEFAULT_PLOT = False
 DEFAULT_USER_DEBUG_GUI = False
 DEFAULT_OBSTACLES = False
 DEFAULT_SIMULATION_FREQ_HZ = 240
@@ -171,11 +172,11 @@ def run(
             action[j, :] = u0
 
             # Keep real time synced
-            t_target = t_wall_start + (i + 1) * dt
+            '''t_target = t_wall_start + (i + 1) * dt
             t_now = time.perf_counter()
             sleep_time = t_target - t_now
             if sleep_time > 0:
-                time.sleep(sleep_time)
+                time.sleep(sleep_time)'''
 
         # log actions taken by quadcopters
         for j in range(num_drones):
@@ -192,28 +193,31 @@ def run(
         logger.plot()
 
     # Get performance
+    comp_time, last_i = end_time(logger)
     comp_perc = completion_percentage(logger, path)
-    path_length = logger_length(logger)
-    comp_time = t_now - t_wall_start
+    path_length = logger_length(logger, last_i)
     avg_vel = path_length / comp_time # m/s
-    rms_err = rms_tracking_error(logger, path)*1000
+    rms_err, max_err, std_dev = rms_tracking_error(logger, path, last_i)
     # Print
     print("||=====================================||")
     if args.env == "floor_plan":
         print("            Floor Plan Results")
     elif args.env == "hallway": 
-        print("             Hallway results")
+        print("            Hallway results")
     print("||=====================================||")
     print("  Completion percentage: " + str(round(comp_perc, 2)) + "%")
     print("  Average velocity: " + str(round(avg_vel, 2)) + " m/s")
-    print("  RMS Tracking Error: " + str(round(rms_err, 2)) + " mm")
+    print("  Completion time: " + str(round(comp_time, 2)) + " s")
+    print("  RMS Tracking Error: " + str(round(rms_err*1000, 2)) + " mm")
+    print("  Max Error: " + str(round(max_err*1000, 2)) + " mm")
+    print("  Standard deviation of error: " + str(round(std_dev*1000, 2)) + " mm")
     print("||=====================================||")
     # Save 
     if args.env == "floor_plan":
         filename = "results/results_floor.npz"
     elif args.env == "hallway": 
         filename = "results/results_hallway.npz"
-    result_array = np.vstack((comp_perc, avg_vel, rms_err)).T
+    result_array = np.vstack((comp_perc, avg_vel, rms_err, comp_time)).T
     append_npz(filename=filename, new_data=result_array, plot=plot)
 
     
@@ -307,7 +311,7 @@ def resample_path_n_points(path: np.ndarray, n_points: int) -> np.ndarray:
     return out
 
 
-def rms_tracking_error(logger, path):
+def rms_tracking_error(logger, path, last_i):
     """
     logger: logger object
     path: array of shape (N_ref, 3)
@@ -326,38 +330,35 @@ def rms_tracking_error(logger, path):
     )).T  # shape (n, 3)
 
     # Euclidean error at each timestep
-    errors = np.full(len(drone_pos), np.inf)
+    errors = np.full(last_i, np.inf)
 
-    for k in range(len(drone_pos)):
+    for k in range(last_i):
         for i in range(len(path)):
             d = math.dist(path[i], drone_pos[k])
             if errors[k] > d:
                 errors[k] = d
 
     # RMS
+    std_dev = stdev(errors)
+    max_err = max(errors)
     rms = np.sqrt(np.mean(errors**2))
-    return rms
+    return rms, max_err, std_dev
 
 def completion_percentage(logger, path):
+
     drone_last_pos = [logger.states[0, 0, -1],
                       logger.states[0, 1, -1],
                       logger.states[0, 2, -1]]
     min_dst = 999
-    min_point = np.zeros(np.shape(drone_last_pos))
     percentage = 0
     for i in range(len(path)):
         if min_dst > math.dist(path[i], drone_last_pos):
             min_dst = math.dist(path[i], drone_last_pos)
-            min_point = path[i]
             percentage = round(i / float(len(path)) * 100)
     return percentage
 
-def logger_length(logger):
+def logger_length(logger, last_i):
     
-    # Assume single drone
-    j = 0
-    n = int(logger.counters[j])
-
     drone_pos = np.vstack((
         logger.states[0, 0, :],
         logger.states[0, 1, :],
@@ -366,9 +367,26 @@ def logger_length(logger):
 
     # Length
     d = 0
-    for i in range(1, len(drone_pos)):
+    for i in range(1, last_i):
             d += math.dist(drone_pos[i-1], drone_pos[i])
     return d
+
+def end_time(logger):
+    
+    drone_pos = np.vstack((
+        logger.states[0, 0, :],
+        logger.states[0, 1, :],
+        logger.states[0, 2, :],
+    )).T  # shape (n, 3)
+
+    i = 10
+    end_time = 1
+    while i < len(drone_pos):
+        if math.dist(drone_pos[i-10], drone_pos[i]) < 1e-5:
+            end_time = logger.timestamps[0, i-10]
+            break
+        i += 1
+    return end_time, i-10
 
 def append_npz(filename, new_data, plot):
     try:
@@ -382,6 +400,7 @@ def append_npz(filename, new_data, plot):
     print("\t----------------------------")
     print("  Completion percentage: " + str(round(np.mean(data[:, 0]), 2)) + "%")
     print("  Average velocity: " + str(round(np.mean(data[:, 1]), 2)) + " m/s")
+    print("  Completion time: " + str(round(np.mean(data[:, 3]), 2)) + " s")
     print("  RMSE: " + str(round(np.mean(data[:, 2]), 2)) + " mm")   
     print("||=====================================||")
 
@@ -389,19 +408,15 @@ def append_npz(filename, new_data, plot):
         visualize_results(data)
 
 def visualize_results(data):
-    fig, axs = plt.subplots(3, 1, figsize=(7, 15))
-    n = range(0, len(data))
+    fig, axs = plt.subplots(1, 1, figsize=(7, 15))
+    # n = range(0, len(data))
     if args.env == "floor_plan":
-        axs[0].set_title('Floor Plan Results')
+        axs.set_title('Floor Plan Results')
     elif args.env == "hallway": 
-        axs[0].set_title('Hallway results')
-    axs[0].bar(n, data[:, 0], color='tab:green')
-    axs[0].set_ylabel("Completion ratio [%]")
-    axs[1].bar(n, data[:, 1], color='tab:cyan')
-    axs[1].set_ylabel("Completion velocity [m/s]")
-    axs[2].bar(n, data[:, 2], color='tab:orange')
-    axs[2].set_xlabel("Measurement [-]")
-    axs[2].set_ylabel("RMS Error [mm]")
+        axs.set_title('Hallway results')
+    axs.scatter(data[:, 1], data[:, 2], color='tab:cyan')
+    axs.set_xlabel("Completion velocity [m/s]")
+    axs.set_ylabel("RMS Error [mm]")
 
     plt.show()
 
