@@ -31,6 +31,7 @@ from enviroment.path_vis import draw_path, update_horizon_visualization
 from global_solver.solve_rrt_3d_from_urdf import solve_rrt_from_urdf
 from global_solver.urdf_to_boxes3d import load_env_and_extract_boxes3d
 
+vis_sphere_id = None
 
 # main run simulation function
 def run(
@@ -64,10 +65,10 @@ def run(
     # solve path and interpolate it for MPC
     if args.env == "floor_plan":
         path = solve_rrt_from_urdf(urdf_path=ENVIROMENT_URDF, algo_name="bit_star", start=start, goal=goal, visualize=args.vis_global_solver)
-        path = interpolate_path(path, points_per_segment=85)
+        path = resample_path_n_points(path, n_points=1000)
     elif args.env == "hallway":
         path = solve_rrt_from_urdf(urdf_path=ENVIROMENT_URDF, algo_name="basic", start=start, goal=goal, visualize=args.vis_global_solver)
-        path = interpolate_path(path, points_per_segment=10)
+        path = resample_path_n_points(path, n_points=250)
 
     # Create the environment
     env = CtrlAviary(drone_model=drone,
@@ -86,6 +87,7 @@ def run(
 
     # Obtain the PyBullet Client ID from the environment
     PYB_CLIENT = env.getPyBulletClient()
+    p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
 
     # init the logger, camera, and time variables
     logger = Logger(logging_freq_hz=control_freq_hz, num_drones=num_drones, output_folder=output_folder, colab=colab)
@@ -118,6 +120,7 @@ def run(
     # init input control array
     action = np.zeros((num_drones,4))
 
+    vis_sphere_id = None
     # Main simulation Loop
     for i in range(0, int(duration_sec*env.CTRL_FREQ)):
 
@@ -140,6 +143,26 @@ def run(
             # visualize the MPC horzion (slows down sim)
             if args.vis_horizon:
                 update_horizon_visualization(x_ref_traj)
+            
+            # visualtize the drone with red dot on it
+            if args.vis_drone_location:
+                if vis_sphere_id is None:
+                    visual_id = p.createVisualShape(
+                        shapeType=p.GEOM_SPHERE,
+                        radius=0.15,
+                        rgbaColor=[0, 1, 0, 1]
+                    )
+                    vis_sphere_id = p.createMultiBody(
+                        baseMass=0,  # mass=0 => static, and since no collision shape => visual-only
+                        baseVisualShapeIndex=visual_id,
+                        basePosition=list([x_init[0], x_init[1], x_init[2]])
+                    )
+                else:
+                    p.resetBasePositionAndOrientation(
+                        vis_sphere_id,
+                        [float(x_init[0]), float(x_init[1]), float(x_init[2])],
+                        [0, 1, 0, 1]
+                    )
 
             # compute control action
             u0 = mpc.solve(x_init, x_ref_traj)
@@ -243,6 +266,7 @@ def plot_3d_from_logger(logger, path):
 
     plt.show(block=False)
 
+### old interploate_path ###
 def interpolate_path(path, points_per_segment):
     fine_path = []
 
@@ -257,6 +281,30 @@ def interpolate_path(path, points_per_segment):
     fine_path.append(path[-1])  # include final point
     return np.array(fine_path)
 
+def resample_path_n_points(path: np.ndarray, n_points: int) -> np.ndarray:
+    """
+    Re sample with an even distbuted number of points
+    """
+    path = np.asarray(path, dtype=float)
+    if len(path) < 2 or n_points <= 1:
+        return path[:1].copy()
+
+    # cumulative distance s along the path
+    seg = path[1:] - path[:-1]
+    seg_len = np.linalg.norm(seg, axis=1)
+    s = np.concatenate(([0.0], np.cumsum(seg_len)))
+
+    # if all the points are the same
+    if s[-1] == 0:
+        return np.repeat(path[:1], n_points, axis=0)
+
+    # evenly spaced distances along total length
+    s_new = np.linspace(0.0, s[-1], n_points)
+
+    # finally interpolate each dimension independently
+    out = np.vstack([np.interp(s_new, s, path[:, d]) for d in range(path.shape[1])]).T
+    out[-1] = path[-1]  # exact final point
+    return out
 
 
 def rms_tracking_error(logger, path):
@@ -365,6 +413,7 @@ if __name__ == "__main__":
     parser.add_argument("--vis_horizon", type=bool, default=False)
     parser.add_argument("--duration", type=float, default=60, help="Set duration of simualtion in seconds.")
     parser.add_argument("--vis_global_solver", type=bool, default=False)
+    parser.add_argument("--vis_drone_location", type=bool, default=False)
 
     args = parser.parse_args()
 
