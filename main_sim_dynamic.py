@@ -135,6 +135,7 @@ def run(
 
     # Obtain the PyBullet Client ID from the environment
     PYB_CLIENT = env.getPyBulletClient()
+    p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
 
     # Init the logger
     logger = Logger(logging_freq_hz=control_freq_hz, num_drones=num_drones,
