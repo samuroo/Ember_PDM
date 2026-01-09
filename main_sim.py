@@ -172,11 +172,11 @@ def run(
             action[j, :] = u0
 
             # Keep real time synced
-            '''t_target = t_wall_start + (i + 1) * dt
-            t_now = time.perf_counter()
-            sleep_time = t_target - t_now
-            if sleep_time > 0:
-                time.sleep(sleep_time)'''
+            # t_target = t_wall_start + (i + 1) * dt
+            # t_now = time.perf_counter()
+            # sleep_time = t_target - t_now
+            # if sleep_time > 0:
+            #     time.sleep(sleep_time)
 
         # log actions taken by quadcopters
         for j in range(num_drones):
@@ -401,7 +401,7 @@ def append_npz(filename, new_data, plot):
     print("  Completion percentage: " + str(round(np.mean(data[:, 0]), 2)) + "%")
     print("  Average velocity: " + str(round(np.mean(data[:, 1]), 2)) + " m/s")
     print("  Completion time: " + str(round(np.mean(data[:, 3]), 2)) + " s")
-    print("  RMSE: " + str(round(np.mean(data[:, 2]), 2)) + " mm")   
+    print("  RMSE: " + str(round(np.mean(data[:, 2])*1000, 2)) + " mm")   
     print("||=====================================||")
 
     if plot:

@@ -50,7 +50,7 @@ def solve_rrt_from_urdf(
         goal=(43, -21.0, 0.2),
         algo_name="basic",
         cfg=None,
-        robot_radius=0.05,
+        robot_radius=0.06,
         visualize=True,
     ):
         """
@@ -131,7 +131,7 @@ def solve_rrt_from_urdf(
         # Planner algorithm list with default configurations
         if cfg is None:
             if algo_name == "basic":
-                cfg = RRT3DConfig(step_size=0.4, max_iter=30000, goal_sample_rate=0.1,
+                cfg = RRT3DConfig(step_size=0.3, max_iter=30000, goal_sample_rate=0.1,
                     goal_threshold=0.5, n_collision_samples=8)
             if algo_name == "rrt_star":
                 cfg = RRT3DStarConfig(step_size=0.2, max_iter=30000, goal_sample_rate=0.1,
