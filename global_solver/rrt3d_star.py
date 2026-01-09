@@ -2,34 +2,30 @@ import numpy as np
 from dataclasses import dataclass
 
 @dataclass
+# Configuration for RRT* 3D
 class RRT3DStarConfig:
-    # Core parameters (kept similar to RRT3DConfig for drop-in usability)
     step_size: float = 0.3
     max_iter: int = 3000
     goal_sample_rate: float = 0.2
     goal_threshold: float = 0.5
     n_collision_samples: int = 10
-
-    # RRT* parameters
-    neighbor_radius: float = 1.0      # fixed radius for "near" set
-    # Optional: limit number of neighbors to consider (can speed up)
+    neighbor_radius: float = 1.0
     max_neighbors: int | None = None
 
 class RRT3DStar:
     """
-    Simple 3D RRT* implementation, written in a style similar to RRT3DBasic.
-
-    Constructor signature matches your solver usage:
-        PlannerClass(start, goal, env, cfg, draw_callback=...)
-
-    - env must provide: env.bounds -> (mn, mx) and
-                       env.is_segment_free(p, q, n_samples=int) -> bool
-    - draw_callback: function(parent_point, child_point) -> None
-                     (kept 2-arg compatible with your current solver)
+    3D RRT*
+    - env: Environment3D
+    - draw_callback: function(parent_point, new_point) -> None for live plotting (can be None)
     """
 
     def __init__(self, start, goal, env, cfg: RRT3DStarConfig,
                  draw_callback=None):
+        """
+        Stores the cfg or returns to defaults
+        Converts starta nd goal psoitions into numpy arrays
+        Saves env collision checker and  and draw callback
+        """
         self.start = np.asarray(start, dtype=float)
         self.goal = np.asarray(goal, dtype=float)
         self.env = env
@@ -37,27 +33,41 @@ class RRT3DStar:
         self.draw_callback = draw_callback
 
         # Nodes, parents, and cost-to-come
-        self.V = np.array([self.start])   # shape (N, 3)
-        self.parents = [-1]
-        self.costs = [0.0]                # cost from start to node i
+        self.V = np.array([self.start])     # shape (N, 3), array of node coordinates
+        self.parents = [-1]                 # parent index for each node
+        self.costs = [0.0]                  # cost from start to node i
+        self.goal_idx = None                # stores index of goal node once one is found
 
-        self.goal_idx = None
-
-    # -------------------------
-    # Basic helpers (similar to RRT3DBasic)
-    # -------------------------
     def _sample_point(self):
+        """
+        With probability of goal_sample_rate returns the goal as the "sampled" point
+        Otherwise samples a random point uniformly inside the provided area
+        """
         if np.random.rand() < self.cfg.goal_sample_rate:
             return self.goal.copy()
+        if hasattr(self.env, "bounds_xyz"):
+            (xmin, xmax), (ymin, ymax), (zmin, zmax) = self.env.bounds_xyz
+            return np.array([
+                np.random.uniform(xmin, xmax),
+                np.random.uniform(ymin, ymax),
+                np.random.uniform(zmin, zmax)
+            ])
         mn, mx = self.env.bounds
         return np.random.uniform(mn, mx, size=3)
 
     def _nearest_index(self, point):
+        """
+        Given a sampled point find the closest tree node eexisiting in V
+        """
         diff = self.V - point
         dists = np.linalg.norm(diff, axis=1)
         return int(np.argmin(dists))
 
     def _steer(self, from_point, to_point):
+        """
+        Compute the direction from nearest tree node to the sampled point
+        Move from nearest tree node to the sampled node by at most step_size
+        """
         direction = to_point - from_point
         dist = np.linalg.norm(direction)
         if dist == 0.0:
@@ -66,12 +76,15 @@ class RRT3DStar:
         return from_point + direction / dist * step
 
     def _edge_cost(self, p, q):
+        """
+        Euclidean distance between points q and p
+        """
         return float(np.linalg.norm(q - p))
 
     def _near_indices(self, point):
         """
-        Returns indices of nodes within neighbor_radius of 'point'.
-        Optionally truncates to max_neighbors closest.
+        Returns indices of nodes within neighbor_radius of point
+        If none found goes back to the nearest node
         """
         if self.V.shape[0] == 1:
             return [0]
@@ -80,17 +93,17 @@ class RRT3DStar:
 
         near = np.where(dists <= self.cfg.neighbor_radius)[0].tolist()
         if len(near) == 0:
-            # Fallback: at least include the nearest
-            return [int(np.argmin(dists))]
+            return [int(np.argmin(dists))]      # Fallback: at least include the nearest
 
         if self.cfg.max_neighbors is not None and len(near) > self.cfg.max_neighbors:
-            # Take the closest max_neighbors among the near set
-            near_sorted = sorted(near, key=lambda i: dists[i])
+            near_sorted = sorted(near, key=lambda i: dists[i])  # Take the closest max_neighbors among the near set
             near = near_sorted[: self.cfg.max_neighbors]
-
         return near
 
     def _backtrack_path(self):
+        """
+        Reconstruct the path by walking backwards through the list until start is reached
+        """
         if self.goal_idx is None:
             return None
 
@@ -102,23 +115,22 @@ class RRT3DStar:
         path_indices.reverse()
         return self.V[path_indices]
 
-    # -------------------------
-    # RRT* plan()
-    # -------------------------
     def plan(self):
         for i in range(self.cfg.max_iter):
+            # Pick random target and nearest nod
             randp = self._sample_point()
             nearest_idx = self._nearest_index(randp)
             nearest_p = self.V[nearest_idx]
 
+            # Compute candidate new node
             new_p = self._steer(nearest_p, randp)
 
-            # 1) Check collision from nearest -> new (basic feasibility)
+            # Reject node if collision detected
             if not self.env.is_segment_free(nearest_p, new_p,
                                             n_samples=self.cfg.n_collision_samples):
                 continue
 
-            # 2) Choose best parent among near nodes (min cost-to-come)
+            # Select parenmt node according to lowest cost-to-come
             near_ids = self._near_indices(new_p)
 
             best_parent = nearest_idx
@@ -134,16 +146,17 @@ class RRT3DStar:
                     best_cost = cand_cost
                     best_parent = j
 
-            # 3) Add new node with chosen parent
+            # Add new node to existing tree + update cost list
             self.V = np.vstack([self.V, new_p])
             new_idx = self.V.shape[0] - 1
             self.parents.append(best_parent)
             self.costs.append(best_cost)
 
+            # Draw tree expansion (optional)
             if self.draw_callback is not None:
                 self.draw_callback(self.V[best_parent], new_p)
 
-            # 4) Rewire: try to improve neighbors by going through new node
+            # Rewire: try to improve neighbors by going through new node
             for j in near_ids:
                 if j == best_parent:
                     continue
@@ -164,18 +177,12 @@ class RRT3DStar:
                 self.parents[j] = new_idx
                 self.costs[j] = new_cost_to_j
 
-                # Optional: draw rewired edge (still 2-arg compatible)
+                # draw rewired edge (optional)
                 if self.draw_callback is not None:
                     self.draw_callback(new_p, pj)
 
-                # Note: we are NOT propagating cost updates to j's descendants here.
-                # For many student projects, this is acceptable; for correctness,
-                # you should propagate updated costs down the subtree.
-
-            # 5) Goal check (same pattern as your basic RRT)
+            # Check if goal is reached
             if np.linalg.norm(new_p - self.goal) < self.cfg.goal_threshold:
-                # connect goal as final node (try best parent choice too)
-                # (You can also do a near-based best parent for the goal.)
                 if self.env.is_segment_free(new_p, self.goal,
                                             n_samples=self.cfg.n_collision_samples):
                     self.V = np.vstack([self.V, self.goal])

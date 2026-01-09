@@ -9,8 +9,8 @@ def load_env_and_extract_boxes3d(urdf_path):
     axis aligned 3D boxes for each box collision shape.
 
     Returns:
-        boxes: list of (xmin, ymin, xmax, ymax)
-        bounds: [min_xy, max_xy] for RRT sampling
+        boxes: list of (xmin, ymin, xmax, ymax, zmin, zmax)
+        bounds: [min_xyz, max_xyz] for global solver sampling
     """
     physics_client = p.connect(p.DIRECT)
     p.setAdditionalSearchPath(pybullet_data.getDataPath())
@@ -23,7 +23,6 @@ def load_env_and_extract_boxes3d(urdf_path):
     boxes = []
 
     for link_idx in link_indices:
-        # AABB is (min_xyz, max_xyz)
         aabb_min, aabb_max = p.getAABB(env_id, link_idx)
         xmin, ymin, zmin = aabb_min
         xmax, ymax, zmax = aabb_max

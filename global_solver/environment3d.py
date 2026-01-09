@@ -7,6 +7,10 @@ class BoxObstacle3D:
         self.zmin, self.zmax = zmin, zmax
 
     def collides_point(self, x, y, z, margin=0.0):
+        """
+        Checks wetehr or not the point provided (x,y,z) lies
+        inside the box provided under __init__
+        """
         return((self.xmin - margin) <= x <= (self.xmax + margin) and
                (self.ymin - margin) <= y <= (self.ymax + margin) and
                (self.zmin - margin) <= z <= (self.zmax + margin))
@@ -14,9 +18,9 @@ class BoxObstacle3D:
 class Environment3D:
     def __init__(self, box_list, bounds, robot_radius=0.1):
         """
-        box_list: list of BoxObstacle3D
+        box_list: list of BoxObstacle3D descibing the 3D world of the urdf
         bounds: [min_xyz, max_xyz] cube region to sample in
-        robot_radius: safety inflation for collision checks
+        robot_radius: safety inflation for collision checks to account for drone size
         """
 
         self.boxes = box_list
@@ -24,6 +28,9 @@ class Environment3D:
         self.robot_radius = robot_radius
 
     def is_point_free(self, point):
+        """
+        Checks wether a single point collides with a box
+        """
         x, y, z = point
         for box in self.boxes:
             if box.collides_point(x, y, z, margin=self.robot_radius):
@@ -32,7 +39,7 @@ class Environment3D:
         
     def is_segment_free(self, p1, p2, n_samples = 10):
         """
-        Check if straight segment p1 -> p2 is collision-free by sampling points along it
+        Checks if straight segment p1 -> p2 is collision-free by sampling n points along it
         """
         p1 = np.asarray(p1, dtype=float)
         p2 = np.asarray(p2, dtype=float)
