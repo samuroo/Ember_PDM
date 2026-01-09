@@ -168,9 +168,32 @@ def run(
         plot_3d_from_logger(logger, path)
         logger.plot()
 
-        print("Completion percentage: " + str(completion_percentage(logger, path)) + "%")
-        print("Completion time: " + round(str(t_now - t_wall_start)) + " s")
-        print("RMS Tracking Error: " + str(rms_tracking_error(logger, path)*1000) + " mm")        
+    # Get performance
+    comp_perc = completion_percentage(logger, path)
+    path_length = logger_length(logger)
+    comp_time = t_now - t_wall_start
+    avg_vel = path_length / comp_time # m/s
+    rms_err = rms_tracking_error(logger, path)*1000
+    # Print
+    print("||=====================================||")
+    if args.env == "floor_plan":
+        print("            Floor Plan Results")
+    elif args.env == "hallway": 
+        print("             Hallway results")
+    print("||=====================================||")
+    print("  Completion percentage: " + str(round(comp_perc, 2)) + "%")
+    print("  Average velocity: " + str(round(avg_vel, 2)) + " m/s")
+    print("  RMS Tracking Error: " + str(round(rms_err, 2)) + " mm")
+    print("||=====================================||")
+    # Save 
+    if args.env == "floor_plan":
+        filename = "results/results_floor.npz"
+    elif args.env == "hallway": 
+        filename = "results/results_hallway.npz"
+    result_array = np.vstack((comp_perc, avg_vel, rms_err)).T
+    append_npz(filename=filename, new_data=result_array, plot=plot)
+
+    
 
 ########## HELPER FUNCTIONS ##########
 # convert the observations from sim to our states
@@ -281,6 +304,59 @@ def completion_percentage(logger, path):
             percentage = round(i / float(len(path)) * 100)
     return percentage
 
+def logger_length(logger):
+    
+    # Assume single drone
+    j = 0
+    n = int(logger.counters[j])
+
+    drone_pos = np.vstack((
+        logger.states[0, 0, :],
+        logger.states[0, 1, :],
+        logger.states[0, 2, :],
+    )).T  # shape (n, 3)
+
+    # Length
+    d = 0
+    for i in range(1, len(drone_pos)):
+            d += math.dist(drone_pos[i-1], drone_pos[i])
+    return d
+
+def append_npz(filename, new_data, plot):
+    try:
+        data = np.load(filename)['arr_0']
+        data = np.vstack((data, new_data))
+    except FileNotFoundError:
+        data = new_data
+    np.savez(filename, data)
+
+    print("\tMean values over all trials:")
+    print("\t----------------------------")
+    print("  Completion percentage: " + str(round(np.mean(data[:, 0]), 2)) + "%")
+    print("  Average velocity: " + str(round(np.mean(data[:, 1]), 2)) + " m/s")
+    print("  RMSE: " + str(round(np.mean(data[:, 2]), 2)) + " mm")   
+    print("||=====================================||")
+
+    if plot:
+        visualize_results(data)
+
+def visualize_results(data):
+    fig, axs = plt.subplots(3, 1, figsize=(7, 15))
+    n = range(0, len(data))
+    if args.env == "floor_plan":
+        axs[0].set_title('Floor Plan Results')
+    elif args.env == "hallway": 
+        axs[0].set_title('Hallway results')
+    axs[0].bar(n, data[:, 0], color='tab:green')
+    axs[0].set_ylabel("Completion ratio [%]")
+    axs[1].bar(n, data[:, 1], color='tab:cyan')
+    axs[1].set_ylabel("Completion velocity [m/s]")
+    axs[2].bar(n, data[:, 2], color='tab:orange')
+    axs[2].set_xlabel("Measurement [-]")
+    axs[2].set_ylabel("RMS Error [mm]")
+
+    plt.show()
+
 #######################################
 if __name__ == "__main__":
     # parse the envrioment argument
@@ -293,7 +369,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # define horizon for MPC controller
-    HORIZON_N = 20 
+    HORIZON_N = 20
 
     # define assest enviroment
     if args.env == "hallway":
@@ -306,5 +382,3 @@ if __name__ == "__main__":
 
     quadcopter = QuadcopterLinearized()
     run(duration_sec=args.duration)
-
-
