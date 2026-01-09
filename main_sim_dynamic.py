@@ -18,7 +18,7 @@ DEFAULT_USER_DEBUG_GUI = False
 DEFAULT_OBSTACLES = False
 DEFAULT_SIMULATION_FREQ_HZ = 240
 DEFAULT_CONTROL_FREQ_HZ = 48
-DEFAULT_DURATION_SEC = 20
+DEFAULT_DURATION_SEC = 60
 DEFAULT_OUTPUT_FOLDER = 'results'
 DEFAULT_COLAB = False
 
@@ -60,7 +60,35 @@ def run(
     goal = (-4.0, 0.0, 1.0)
 
     # SOLVE PATH
-    path = solve_rrt_from_urdf(urdf_path=ENVIROMENT_URDF, algo_name="basic", start=start, goal=goal, visualize=False)
+    # path = solve_rrt_from_urdf(urdf_path=ENVIROMENT_URDF, start=start, goal=goal, visualize=True)
+    path = np.array([
+                    [ 4.,          0.,          1.        ],
+                    [ 3.52369249,  0.15197371,  0.9940712 ],
+                    [ 3.08575409,  0.20210888,  1.23007209],
+                    [ 2.73771617,  0.42012299,  0.94487137],
+                    [ 2.41997896,  0.57268674,  0.59023441],
+                    [ 2.00355015,  0.71128252,  0.35069683],
+                    [ 1.50986206,  0.65279185,  0.40409078],
+                    [ 1.01617398,  0.59430117,  0.45748472],
+                    [ 0.52248589,  0.5358105,   0.51087867],
+                    [ 0.0287978,   0.47731982,  0.56427262],
+                    [-0.22290227,  0.16549656,  0.86329323],
+                    [-0.72209677,  0.14362395,  0.88136088],
+                    [-1.09113835, -0.1553079,   0.72500211],
+                    [-1.06640259, -0.61824148,  0.91230038],
+                    [-0.99211523, -0.84435156,  1.00202259],
+                    [-1.32652733, -0.82940177,  1.04343213],
+                    [-1.82117994, -0.82064274,  1.09583432],
+                    [-2.21032456, -0.52350688,  1.09720863],
+                    [-2.64276063, -0.39701285,  1.38041772],
+                    [-3.07519671, -0.27051882,  1.4636268 ],
+                    [-3.36988517, -0.63868207,  1.2974506 ],
+                    [-3.7032025,  -0.30083285,  1.14010556],
+                    [-4.,          0.,          1.        ]
+                ])
+
+
+
     path = interpolate_path(path)
 
     # Init postion (x,y,z) and orientation (roll,pitch,yaw)
@@ -75,8 +103,6 @@ def run(
 
     # FOR TEST PURPOSES - LINEAR PATH
     """
-    TARGET_XYZS = np.array([3,1,2.5])   
-    steps = 120 
     alphas = np.linspace(0.0, 1.0, steps)
     path = (1 - alphas)[:, None] * INIT_XYZS + alphas[:, None] * TARGET_XYZS
     """
@@ -123,14 +149,47 @@ def run(
     # add collsiion boxes
     load_env_and_extract_boxes3d("global_solver/"+ ENVIROMENT_URDF)
 
-    radiis = [0.25, 0.25, 0.8]
+    radiis = np.array([[0.2, 0.1, 0.8],
+                       [0.2, 0.1, 0.8]])
 
-    #Creating moving ellipsoid
-    ellipsoid_id = create_moving_ellipsoid(
+    position1 = (0.0, 0.0, -0.2)
+
+    position2 = (-11.4, -1.0, -0.2)
+
+    #Creating moving ellipsoid 1
+    ellipsoid_id1 = create_moving_ellipsoid(
     client_id=PYB_CLIENT,
-    radii=radiis[:],
-    position=(0.0, 0.0, 0.1)
+    radii=radiis[0, :],
+    position=position1
     )
+
+    ellipsoid_id2 = create_moving_ellipsoid(
+    client_id=PYB_CLIENT,
+    radii=radiis[1, :],
+    position=position2
+    )
+
+    # Defining movement
+
+    dt = 1/env.CTRL_FREQ
+
+    times = np.arange(0, duration_sec, dt)
+
+    
+    ellipsoid_pos_horizon1 = np.vstack([
+        position1[0] + 0.4 * times,
+        position1[1] + 0.5 * np.ones_like(times),
+        position1[2] + 1.0 * np.ones_like(times)
+        ])
+    
+    ellipsoid_pos_horizon2 = np.vstack([
+        position2[0] + 0.4 * times,
+        position2[1] + 0.5 * np.ones_like(times),
+        position2[2] + 1.0 * np.ones_like(times)
+        ])
+    
+    ellipsoids_horizon = np.vstack((ellipsoid_pos_horizon1, ellipsoid_pos_horizon2))
+
     
     #Sampling environment boxes
 
@@ -140,8 +199,8 @@ def run(
     env_points = sample_env_boxes_flat(
         client_id=PYB_CLIENT,
         body_id=ENV_BODY_ID,
-        links=[0,1,2,3,4,5],  # all links in the hallway (should update if environment is changed)
-        points_per_link=1000 # number of points sampled per object
+        links=[0,1,2,3,4,5],  # all links in the hallway (should be updated if environment is changed)
+        points_per_link=2000 # number of points sampled per object
     )
 
 
@@ -150,43 +209,53 @@ def run(
         # Step the simulation with the contol input provided
         obs, _, _, _, _ = env.step(action)
 
-
-        # updating moving ellipsoid
-        t = i / env.CTRL_FREQ
-
         # can define motion of ellipsoid here
-        ellipsoid_pos = np.array([
-            0.4 * t,
-            0.5,
-            1.0
-        ])
+        ellipsoid_pos1 = ellipsoid_pos_horizon1[:, i]
+        ellipsoid_pos2 = ellipsoid_pos_horizon2[:, i]
 
+        # Ellipsoid 1
         p.resetBasePositionAndOrientation(
-            ellipsoid_id,
-            ellipsoid_pos.tolist(),
+            ellipsoid_id1,
+            ellipsoid_pos1.tolist(),
             [0, 0, 0, 1],
             physicsClientId=PYB_CLIENT
         )
 
-        ellipsoid_center, _ = p.getBasePositionAndOrientation(
-            ellipsoid_id,
+        ellipsoid_center1, _ = p.getBasePositionAndOrientation(
+            ellipsoid_id1,
             physicsClientId=PYB_CLIENT
         )
         # sampling points on the ellipsoid surface
-        ellipsoid_points = sample_ellipsoid_surface(
-            center=np.array(ellipsoid_center),
-            radii=radiis[:],
-            num_points=1000
+        ellipsoid_points1 = sample_ellipsoid_surface(
+            center=np.array(ellipsoid_center1),
+            radii=radiis[0, :],
+            num_points=2000
         )
 
-        ellipsoid_points_with_id = np.hstack([
-            np.full((ellipsoid_points.shape[0], 1), ellipsoid_id),  # body_id
-            np.full((ellipsoid_points.shape[0], 1), -1),           # link_id
-            ellipsoid_points                                     # x,y,z
-        ])
+        # Ellipsoid 2
+        p.resetBasePositionAndOrientation(
+            ellipsoid_id2,
+            ellipsoid_pos2.tolist(),
+            [0, 0, 0, 1],
+            physicsClientId=PYB_CLIENT
+        )
 
-        # Combining ellipsoid sampled points with static environment points
-        all_samples = np.vstack([ellipsoid_points_with_id, env_points])
+        ellipsoid_center2, _ = p.getBasePositionAndOrientation(
+            ellipsoid_id2,
+            physicsClientId=PYB_CLIENT
+        )
+        # sampling points on the ellipsoid surface
+        ellipsoid_points2 = sample_ellipsoid_surface(
+            center=np.array(ellipsoid_center2),
+            radii=radiis[1, :],
+            num_points=2000
+        )
+
+        ellipsoids_points = [
+            ellipsoid_points1,  # (N,3)
+            ellipsoid_points2
+        ]
+
         
         # Main control
         for j in range(num_drones):
@@ -203,7 +272,12 @@ def run(
             # update_horizon_visualization(x_ref_traj)
 
             # compute control action
-            u0 = mpc_control_path(quadcopter, HORIZON_N, x_init, x_ref_traj, all_samples)
+            u0 = mpc_control_path(quadcopter, HORIZON_N, x_init, 
+                                  x_ref_traj, 
+                                  env_points, 
+                                  ellipsoids_points, 
+                                  ellipsoids_horizon,
+                                  i)
             
             # add next control action
             action[j, :] = u0
@@ -294,7 +368,7 @@ def interpolate_path(path, points_per_segment=20):
 def create_moving_ellipsoid(
     client_id,
     radii=(0.4, 0.25, 0.4),
-    position=(0, 0, 1),
+    position=(0, 0, 0.5),
     color=(1, 0, 0, 0.6)
 ):
     # Load PyBullet mesh assets
@@ -320,7 +394,7 @@ def create_moving_ellipsoid(
 
     ellipsoid_id = p.createMultiBody(
         baseMass=0.0,  # kinematic obstacle
-        baseCollisionShapeIndex=collision_shape,
+        baseCollisionShapeIndex=-1,
         baseVisualShapeIndex=visual_shape,
         basePosition=position,
         baseOrientation=[0, 0, 0, 1],
