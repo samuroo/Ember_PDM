@@ -2,6 +2,7 @@ import numpy as np
 from dataclasses import dataclass
 
 @dataclass
+# Configuration for RRT-connect 3D
 class RRT3DConnectConfig:
     step_size: float = 0.3
     max_iter: int = 3000
@@ -10,19 +11,17 @@ class RRT3DConnectConfig:
 
 class RRT3DConnect:
     """
-    Bidirectional RRT-Connect in 3D.
-
-    Drop-in compatible with your solver:
-        PlannerClass(start, goal, env, cfg, draw_callback=...)
-
-    env must provide:
-      - env.bounds -> (mn, mx)
-      - env.is_segment_free(p, q, n_samples=int) -> bool
-
-    draw_callback(parent_point, new_point) is optional (2-arg compatible).
+    3D Bidirectional RRT-Connect.
+    - env: Environment3D
+    - draw_callback: function(parent_point, new_point) -> None for live plotting (can be None)
     """
 
     def __init__(self, start, goal, env, cfg: RRT3DConnectConfig, draw_callback=None):
+        """
+        Stores the cfg or returns to defaults
+        Converts start and goal psoitions into numpy arrays
+        Saves env collision checker and  and draw callback
+        """
         self.start = np.asarray(start, dtype=float)
         self.goal = np.asarray(goal, dtype=float)
         self.env = env
@@ -30,16 +29,15 @@ class RRT3DConnect:
         self.draw_callback = draw_callback
 
         # Tree A: from start
-        self.Va = np.array([self.start])   # (Na,3)
-        self.Pa = [-1]                     # parents indices
-        # Tree B: from goal
-        self.Vb = np.array([self.goal])    # (Nb,3)
-        self.Pb = [-1]
+        self.Va = np.array([self.start])    # (Na,3)
+        self.Pa = [-1]                      # parents indices
 
-    # -------------------------
-    # Helpers
-    # -------------------------
+        # Tree B: from goal
+        self.Vb = np.array([self.goal])     # (Nb,3)
+        self.Pb = [-1]                      # parents indices 
+
     def _sample_point(self):
+        """Samples a random point uniformly inside the provided area"""
         mn, mx = self.env.bounds
         if hasattr(self.env, "bounds_xyz"):
             (xmin, xmax), (ymin, ymax), (zmin, zmax) = self.env.bounds_xyz
@@ -51,16 +49,19 @@ class RRT3DConnect:
 
         return np.random.uniform(mn, mx, size=3)
 
-    @staticmethod
-    def _edge_cost(p, q):
-        return float(np.linalg.norm(q - p))
-
     def _nearest_index(self, V, point):
+        """
+        Given a sampled point find the closest tree node eexisiting in V
+        """
         diff = V - point
         dists = np.linalg.norm(diff, axis=1)
         return int(np.argmin(dists))
 
     def _steer(self, from_point, to_point):
+        """
+        Compute the direction from nearest tree node to the sampled point
+        Move from nearest tree node to the sampled node by at most step_size
+        """
         direction = to_point - from_point
         dist = np.linalg.norm(direction)
         if dist == 0.0:
@@ -69,6 +70,9 @@ class RRT3DConnect:
         return from_point + (direction / dist) * step
 
     def _add_node(self, V, P, parent_idx, new_p):
+        """
+        adds a new node to a tree and records the parent
+        """
         V = np.vstack([V, new_p])
         P.append(parent_idx)
         new_idx = V.shape[0] - 1
@@ -76,14 +80,10 @@ class RRT3DConnect:
             self.draw_callback(V[parent_idx], new_p)
         return V, P, new_idx
 
-    # -------------------------
-    # Core RRT-Connect operations
-    # -------------------------
     def _extend(self, V, P, target):
         """
-        Try to extend tree (V,P) one step toward target.
-        Returns: (status, V, P, new_idx)
-          status in {"trapped", "advanced", "reached"}
+        Try to extend tree one step toward target.
+        has multiple status in {"trapped", "advanced", "reached"}
         """
         nearest_idx = self._nearest_index(V, target)
         nearest_p = V[nearest_idx]
@@ -100,9 +100,8 @@ class RRT3DConnect:
 
     def _connect(self, V, P, target):
         """
-        Repeatedly extend toward target until trapped or reached.
-        Returns: (status, V, P, last_idx)
-          status in {"trapped", "reached"}
+        Repeatedly extend toward target using extend function
+        until trapped or reached.
         """
         last_idx = None
         while True:
@@ -112,10 +111,10 @@ class RRT3DConnect:
             if status == "reached":
                 return "reached", V, P, last_idx
 
-    # -------------------------
-    # Backtracking / path assembly
-    # -------------------------
     def _backtrack(self, V, P, idx):
+        """
+        Reconstruct the path by walking from the root to the node idx
+        """
         path = []
         cur = idx
         while cur != -1:
@@ -126,9 +125,7 @@ class RRT3DConnect:
 
     def _assemble_path(self, a_idx, b_idx):
         """
-        Build full path from start-tree node a_idx to goal-tree node b_idx.
-        Note: Tree B is rooted at goal, so its backtrack gives goal->...->b_idx;
-              we need b_idx->...->goal, so reverse it.
+        Combines the 2 paths to a single result
         """
         path_a = self._backtrack(self.Va, self.Pa, a_idx)          # start -> ... -> a_idx
         path_b_goal_to_b = self._backtrack(self.Vb, self.Pb, b_idx)  # goal -> ... -> b_idx
@@ -140,22 +137,14 @@ class RRT3DConnect:
 
         return np.vstack([path_a, path_b])
 
-    # -------------------------
-    # Public API
-    # -------------------------
     def plan(self):
-        """
-        Returns:
-          path: (N,3) numpy array, or None
-        """
         for i in range(self.cfg.max_iter):
             q_rand = self._sample_point()
 
             # Extend Tree A toward random sample
             status_a, self.Va, self.Pa, a_new = self._extend(self.Va, self.Pa, q_rand)
             if status_a == "trapped":
-                # swap trees anyway to keep exploration balanced
-                self._swap_trees()
+                self._swap_trees()      # Alternate roles of trees
                 continue
 
             # Try to connect Tree B to the new node in Tree A
@@ -165,23 +154,17 @@ class RRT3DConnect:
             if status_b == "reached":
                 # Trees are connected: build full path
                 print(f"Connected in {i+1} iterations (RRT-Connect).")
-
-                # Find nearest in B to q_target (b_last is last added, should be close)
-                # We want the actual meeting indices: a_new in A, b_last in B.
                 full_path = self._assemble_path(a_new, b_last)
                 return full_path
 
-            # Alternate roles of the trees to avoid bias
+            # Alternate roles of the trees
             self._swap_trees()
 
         print("No path found within iteration limit (RRT-Connect).")
         return None
 
     def _swap_trees(self):
-        # swap A and B trees (including parents) so next iteration grows the other side first
+        """Swap A and B trees (including parents) so next iteration grows the other side first"""
         self.Va, self.Vb = self.Vb, self.Va
         self.Pa, self.Pb = self.Pb, self.Pa
-
-        # also swap the notion of start/goal roots (not strictly necessary for correctness,
-        # but it keeps assemble logic consistent if you only assemble on connect right away)
         self.start, self.goal = self.goal, self.start
