@@ -55,18 +55,21 @@ This directory contains visualization and pybullet environment related utilities
 ### `path_vis.py`
 Given a path, this module plots a 3D line within the environment and visualizes the MPC prediction horizon using spheres along the path. Note: building/envrioment models are not implemented here.
 
-`Enviroment`:  
-    Directory to hold any sort of visual or enviromental classes/functions/etc.  
-    path_vis.py : provided a path, plots a line in 3D space within the envrioment, also plots spheres along the path for MPC horizon prediction  
-    (We should add our building in this directory)  
-
-`Global_solver`:  
-    Directory to hold global path planner code and environment urdf's. 
-     environment3d.py : defines 3D collision-checking environment using axis-aligned boxes
-     urdf_to_boxes3d.py : loads urdf file into PyBullet and converts to a set of axis aligned 3D boxes
-     solve_rrt_from_urdf.py : runs a selected 3D motion planner on a selected urdf world
-     rrt3d_basic.py : standard RRT path finding algorithm
-     rrt3d_star.py : RRT* path finding algorithm
-     rrt3d_connect.py : RRT-Connect path finding algorithm
-     bit_star.py : BIT* path finding algorithm
-     assets/ : contains the urdf files of the tested environments
+### `Global_solver`:  
+Directory to hold global path planner code and environment urdf's. 
+### environment3d.py
+Defines 3D collision-checking environment using axis-aligned boxes
+### `urdf_to_boxes3d.py`
+Loads urdf file into PyBullet and converts to a set of axis aligned 3D boxes
+### `solve_rrt_from_urdf.py`
+Runs a selected 3D motion planner on a selected urdf world
+### `rrt3d_basic.py`
+Standard RRT path finding algorithm
+### `rrt3d_star.py`
+RRT* path finding algorithm
+### `rrt3d_connect.py`
+RRT-Connect path finding algorithm
+### `bit_star.py`
+BIT* path finding algorithm
+### `assets/` 
+Contains the urdf files of the tested environments
