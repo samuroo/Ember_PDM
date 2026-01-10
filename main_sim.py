@@ -69,7 +69,7 @@ def run(
         path = resample_path_n_points(path, n_points=1000)
     elif args.env == "hallway":
         path = solve_rrt_from_urdf(urdf_path=ENVIROMENT_URDF, algo_name="basic", start=start, goal=goal, visualize=args.vis_global_solver)
-        path = resample_path_n_points(path, n_points=250)
+        path = resample_path_n_points(path, n_points=200)
 
     # Create the environment
     env = CtrlAviary(drone_model=drone,
@@ -171,12 +171,12 @@ def run(
             # add next control action
             action[j, :] = u0
 
-            # Keep real time synced
-            # t_target = t_wall_start + (i + 1) * dt
-            # t_now = time.perf_counter()
-            # sleep_time = t_target - t_now
-            # if sleep_time > 0:
-            #     time.sleep(sleep_time)
+            # keep real time synced
+            t_target = t_wall_start + (i + 1) * dt
+            t_now = time.perf_counter()
+            sleep_time = t_target - t_now
+            if sleep_time > 0:
+                time.sleep(sleep_time)
 
         # log actions taken by quadcopters
         for j in range(num_drones):
