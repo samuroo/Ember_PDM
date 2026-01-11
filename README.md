@@ -10,6 +10,25 @@ cd Ember_PDM
 conda env create -f environment.yml
 conda activate PDM_EMBER_ENV
 ```
+# Visualizations of results
+
+Navigation of the static objects in the 'hallway' environment: 
+
+<video controls width="640">
+  <source src="./media/Hallway_StaticMPC.mp4" type="video/mp4">
+</video>
+
+Navigation with dynamic objects in the 'hallway' environment:
+
+<video controls width="640">
+  <source src="./media/Hallway_DynamicMPC.mp4" type="video/mp4">
+</video>
+
+Navigation of the 'floor plan' environment:
+
+<video controls width="640">
+  <source src="./media/FloorPlan_StaticMPC.mp4" type="video/mp4">
+</video>
 
 # Directory/File Overview
 ## `main_sim.py`
