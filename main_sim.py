@@ -65,11 +65,17 @@ def run(
 
     # solve path and interpolate it for MPC
     if args.env == "floor_plan":
+        t0 = time.perf_counter()
         path = solve_rrt_from_urdf(urdf_path=ENVIROMENT_URDF, algo_name="bit_star", start=start, goal=goal, visualize=args.vis_global_solver)
+        t_global_plan = time.perf_counter() - t0
         path = resample_path_n_points(path, n_points=1000)
     elif args.env == "hallway":
-        path = solve_rrt_from_urdf(urdf_path=ENVIROMENT_URDF, algo_name="basic", start=start, goal=goal, visualize=args.vis_global_solver)
+        t0 = time.perf_counter()
+        path = solve_rrt_from_urdf(urdf_path=ENVIROMENT_URDF, algo_name="bit_star", start=start, goal=goal, visualize=args.vis_global_solver)
+        t_global_plan = time.perf_counter() - t0
         path = resample_path_n_points(path, n_points=200)
+
+    
 
     # Create the environment
     env = CtrlAviary(drone_model=drone,
@@ -198,6 +204,7 @@ def run(
     path_length = logger_length(logger, last_i)
     avg_vel = path_length / comp_time # m/s
     rms_err, max_err, std_dev = rms_tracking_error(logger, path, last_i)
+    path_length_global = global_path_length(path)
     # Print
     print("||=====================================||")
     if args.env == "floor_plan":
@@ -211,6 +218,8 @@ def run(
     print("  RMS Tracking Error: " + str(round(rms_err*1000, 2)) + " mm")
     print("  Max Error: " + str(round(max_err*1000, 2)) + " mm")
     print("  Standard deviation of error: " + str(round(std_dev*1000, 2)) + " mm")
+    print("  Global path solver length " + str(round(path_length_global, 2)) + "m")
+    print("  Global path solving time " + str(round(t_global_plan, 2)) + "s")
     print("||=====================================||")
     # Save 
     if args.env == "floor_plan":
@@ -370,6 +379,13 @@ def logger_length(logger, last_i):
     for i in range(1, last_i):
             d += math.dist(drone_pos[i-1], drone_pos[i])
     return d
+
+def global_path_length(global_path):
+    d = 0.0
+    for i in range(1, len(global_path)):
+        d += math.dist(global_path[i-1], global_path[i])
+    return d
+
 
 def end_time(logger):
     
