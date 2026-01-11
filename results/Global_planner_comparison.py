@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 
 labels = ['RRT', 'RRT connect', 'RRT*', 'BIT*']
-colors = ['tab:cyan', 'tab:red', 'tab:orange', 'tab:olive']
+colors = ['tab:cyan', 'tab:purple', 'tab:orange', 'tab:green']
 
 
 time = np.array([
