@@ -215,6 +215,7 @@ def run(
     print("  Completion percentage: " + str(round(comp_perc, 2)) + "%")
     print("  Average velocity: " + str(round(avg_vel, 2)) + " m/s")
     print("  Completion time: " + str(round(comp_time, 2)) + " s")
+    print("  Completion path length: " + str(round(path_length, 2)) + " s")
     print("  RMS Tracking Error: " + str(round(rms_err*1000, 2)) + " mm")
     print("  Max Error: " + str(round(max_err*1000, 2)) + " mm")
     print("  Standard deviation of error: " + str(round(std_dev*1000, 2)) + " mm")
