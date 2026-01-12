@@ -226,7 +226,7 @@ def run(
     if args.env == "floor_plan":
         filename = "results/results_floor.npz"
     elif args.env == "hallway": 
-        filename = "results/results_hallway.npz"
+        filename = "results/results_hallway_v3.npz"
     result_array = np.vstack((comp_perc, avg_vel, rms_err, comp_time)).T
     append_npz(filename=filename, new_data=result_array, plot=plot)
 
