@@ -178,11 +178,11 @@ def run(
             action[j, :] = u0
 
             # keep real time synced
-            t_target = t_wall_start + (i + 1) * dt
+            '''t_target = t_wall_start + (i + 1) * dt
             t_now = time.perf_counter()
             sleep_time = t_target - t_now
             if sleep_time > 0:
-                time.sleep(sleep_time)
+                time.sleep(sleep_time)'''
 
         # log actions taken by quadcopters
         for j in range(num_drones):
@@ -215,14 +215,14 @@ def run(
     print("  Completion percentage: " + str(round(comp_perc, 2)) + "%")
     print("  Average velocity: " + str(round(avg_vel, 2)) + " m/s")
     print("  Completion time: " + str(round(comp_time, 2)) + " s")
-    print("  Completion path length: " + str(round(path_length, 2)) + " s")
+    print("  Completion path length: " + str(round(path_length, 2)) + " m")
     print("  RMS Tracking Error: " + str(round(rms_err*1000, 2)) + " mm")
     print("  Max Error: " + str(round(max_err*1000, 2)) + " mm")
     print("  Standard deviation of error: " + str(round(std_dev*1000, 2)) + " mm")
     print("  Global path solver length " + str(round(path_length_global, 2)) + "m")
     print("  Global path solving time " + str(round(t_global_plan, 2)) + "s")
     print("||=====================================||")
-    # Save 
+    # Save
     if args.env == "floor_plan":
         filename = "results/results_floor.npz"
     elif args.env == "hallway": 
