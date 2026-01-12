@@ -26,7 +26,7 @@ ax.errorbar(
     capsize=6,
     markersize=8,
     color='tab:cyan',
-    label='MPC 1'
+    label='MPC v1'
 )
 
 ax.errorbar(
@@ -37,7 +37,7 @@ ax.errorbar(
     capsize=6,
     markersize=8,
     color='tab:purple',
-    label='MPC 2'
+    label='MPC v2'
 )
 
 ax.errorbar(
@@ -48,7 +48,7 @@ ax.errorbar(
     capsize=6,
     markersize=8,
     color='tab:orange',
-    label='MPC 3'
+    label='MPC v3'
 )
 
 
